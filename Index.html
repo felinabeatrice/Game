@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Case 0447 — Drive Investigation</title>
   <link rel="stylesheet" href="style.css" />
+
+  <!-- Firebase Platform Compatibility SDKs (ready for game.js execution) -->
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-database-compat.js"></script>
 </head>
 <body>
 
@@ -37,8 +41,55 @@
               <div>▸ Assemble all pieces to reveal the final clue</div>
               <div>▸ Your <b>time is being recorded</b></div>
             </div>
-            <button class="btn-start" id="btnStart">Start Game</button>
+
+            <!-- Player Identification Input Container -->
+            <div class="player-input-wrap">
+              <label for="playerName">Investigator Name / Alias</label>
+              <input 
+                type="text" 
+                id="playerName" 
+                placeholder="Enter your initials or name..." 
+                maxlength="16" 
+                autocomplete="off" 
+                spellcheck="false" 
+              />
+              <div class="input-error" id="nameError"></div>
+            </div>
+
+            <div class="btn-row" style="justify-content:center; flex-direction:column; gap:8px; width:100%;">
+              <button class="btn-start" id="btnStart">Start Game</button>
+              <button class="btn btn-ghost" id="btnOpenLeaderboard" style="align-self:center; width: auto;">🏆 Global Leaderboard</button>
+            </div>
+
             <button class="link-reset" id="btnResetStart">Clear saved progress</button>
+          </section>
+
+          <!-- ============ GLOBAL LEADERBOARD VIEW ============ -->
+          <section id="view-leaderboard" class="view dark-view">
+            <div class="dark-top">
+              <button class="btn-back" id="btnBackFromLb">←</button>
+              <div class="doc-title">Top Investigators</div>
+            </div>
+            <div class="dark-body">
+              <h3>Fastest Case Resolutions</h3>
+              <p class="sm">Global rankings recorded by field forensic units.</p>
+              
+              <div class="lb-container">
+                <div class="lb-header">
+                  <span>#</span>
+                  <span>Investigator</span>
+                  <span>Time</span>
+                </div>
+                <!-- Dynamic ranking elements injected by game.js -->
+                <div class="lb-list" id="globalLbList">
+                  <div class="lb-status">Loading rankings...</div>
+                </div>
+              </div>
+
+              <div class="btn-row" style="justify-content:center; margin-top:16px;">
+                <button class="btn btn-primary" id="btnCloseLb">Back to Case</button>
+              </div>
+            </div>
           </section>
 
           <!-- ============ MY DRIVE ============ -->
@@ -49,7 +100,7 @@
                 <span style="font-size:13px;color:#5f6368">🔍</span>
                 <input id="driveSearch" placeholder="Search in Drive" autocomplete="off"/>
               </div>
-              <div class="gd-avatar">K</div>
+              <div class="gd-avatar" id="userAvatar">K</div>
             </div>
 
             <div class="gd-chips">
@@ -252,12 +303,29 @@
             <p class="sm" style="margin-top:8px">Every fragment recovered. The final clue has been broken.</p>
             <div class="complete-time" id="finalTime">00:00</div>
             <div style="font-size:10px;letter-spacing:3px;color:#6e829c;text-transform:uppercase">Total completion time</div>
+            
             <div class="stat-grid">
               <div class="stat"><b>4 / 4</b><span>Documents</span></div>
               <div class="stat"><b>4 / 4</b><span>Fragments</span></div>
               <div class="stat"><b>0447</b><span>Case ID</span></div>
               <div class="stat"><b>Closed</b><span>Status</span></div>
             </div>
+
+            <!-- In-Screen High-Score Table inside the final results panel -->
+            <div class="complete-lb-section">
+              <div class="lb-title">Official Case Rankings</div>
+              <div class="lb-container">
+                <div class="lb-header">
+                  <span>#</span>
+                  <span>Investigator</span>
+                  <span>Time</span>
+                </div>
+                <div class="lb-list" id="completeLbList">
+                  <div class="lb-status">Submitting score...</div>
+                </div>
+              </div>
+            </div>
+
             <div class="btn-row" style="justify-content:center;margin-top:22px">
               <button class="btn btn-primary" id="btnPlayAgain">New Investigation</button>
             </div>
