@@ -1,1470 +1,282 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Case 0447 — Drive Investigation</title>
-<style>
-/* ============================================================
-   1. GLOBAL / PAGE (investigation mood outside the phone)
-   ============================================================ */
-*{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --gblue:#1a73e8; --gblue-d:#1558c0; --ggrey:#5f6368; --gline:#dadce0;
-  --gbg:#f8f9fa; --ggreen:#1e8e3e; --gred:#d93025; --gyellow:#f9ab00;
-  --ink:#202124;
-}
-html,body{height:100%}
-body{
-  font-family:"Google Sans",Roboto,-apple-system,"Segoe UI",Arial,sans-serif;
-  background:#0a0e16;
-  color:#cfd8e6;
-  display:flex;flex-direction:column;align-items:center;
-  padding:22px 12px 40px;
-  min-height:100%;
-  overflow-x:hidden;
-}
-body::before{
-  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
-  background:
-    radial-gradient(900px 600px at 50% -5%, rgba(26,115,232,.20), transparent 62%),
-    radial-gradient(700px 500px at 85% 100%, rgba(217,48,37,.12), transparent 60%),
-    repeating-linear-gradient(0deg, rgba(255,255,255,.018) 0 1px, transparent 1px 4px);
-}
-.page-head{position:relative;z-index:1;text-align:center;margin-bottom:16px}
-.page-head h1{
-  font-size:19px;letter-spacing:5px;font-weight:600;color:#e8eefb;text-transform:uppercase;
-}
-.page-head p{font-size:11.5px;letter-spacing:2.6px;color:#6b7a91;margin-top:6px;text-transform:uppercase}
-.page-foot{position:relative;z-index:1;margin-top:18px;font-size:11px;color:#4e5c72;letter-spacing:1.4px;text-align:center}
-
-/* ============================================================
-   2. PHONE FRAME
-   ============================================================ */
-.phone-wrap{position:relative;z-index:1;transform-origin:top center}
-.phone{
-  width:400px;height:780px;border-radius:44px;padding:13px;
-  background:linear-gradient(160deg,#2b3240,#11151d 55%,#232a36);
-  box-shadow:0 0 0 2px #3c4656, 0 30px 70px rgba(0,0,0,.75), 0 0 90px rgba(26,115,232,.13);
-  position:relative;
-}
-.phone::after{ /* side button */
-  content:"";position:absolute;right:-3px;top:170px;width:3px;height:64px;border-radius:3px;background:#39424f;
-}
-.phone-screen{
-  width:100%;height:100%;background:#fff;border-radius:33px;overflow:hidden;
-  display:flex;flex-direction:column;position:relative;
-}
-.notch{
-  position:absolute;top:0;left:50%;transform:translateX(-50%);
-  width:128px;height:22px;background:#11151d;border-radius:0 0 15px 15px;z-index:60;
-}
-.status-bar{
-  height:30px;flex:0 0 30px;background:#fff;color:#3c4043;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 16px;font-size:11px;font-weight:600;letter-spacing:.3px;z-index:55;
-}
-.timer-chip{
-  background:#0f1a2b;color:#7fd8ff;border-radius:20px;padding:2px 11px;
-  font-family:"Roboto Mono",ui-monospace,monospace;font-size:11px;letter-spacing:1px;
-  box-shadow:0 0 0 1px rgba(127,216,255,.25) inset;
-}
-.timer-chip.stopped{color:#8ff0a4;box-shadow:0 0 0 1px rgba(143,240,164,.3) inset}
-.sb-right{display:flex;gap:5px;align-items:center;opacity:.8}
-
-/* ============================================================
-   3. VIEW / SCREEN SYSTEM
-   ============================================================ */
-.views{position:relative;flex:1;overflow:hidden;background:var(--gbg)}
-.view{
-  position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;
-  display:flex;flex-direction:column;
-  opacity:0;visibility:hidden;transform:translateX(26px) scale(.985);
-  transition:opacity .28s ease, transform .32s cubic-bezier(.2,.8,.25,1), visibility .32s;
-  -webkit-overflow-scrolling:touch;
-}
-.view.active{opacity:1;visibility:visible;transform:none}
-.view::-webkit-scrollbar{width:5px}
-.view::-webkit-scrollbar-thumb{background:#c8ccd1;border-radius:4px}
-
-/* ============================================================
-   4. START SCREEN
-   ============================================================ */
-#view-start{
-  background:radial-gradient(520px 420px at 50% 12%, #16243b, #080c14 72%);
-  color:#dce6f5;align-items:center;justify-content:center;text-align:center;padding:26px 24px;
-}
-.badge-case{
-  font-size:10px;letter-spacing:4px;color:#7fd8ff;border:1px solid rgba(127,216,255,.35);
-  padding:6px 13px;border-radius:20px;text-transform:uppercase;
-}
-.start-phone-ico{
-  width:96px;height:96px;margin:26px auto 18px;border-radius:26px;
-  background:linear-gradient(145deg,#132542,#0b1322);
-  display:grid;place-items:center;font-size:42px;
-  box-shadow:0 0 0 1px rgba(127,216,255,.22), 0 0 44px rgba(26,115,232,.3);
-  animation:floaty 3.6s ease-in-out infinite;
-}
-@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
-#view-start h2{font-size:24px;letter-spacing:1px;margin-bottom:12px;color:#fff}
-#view-start .lead{font-size:13.5px;line-height:1.75;color:#93a5bd;max-width:290px;margin:0 auto}
-.start-list{margin:20px auto 4px;max-width:290px;text-align:left;font-size:12px;color:#7e90a8;line-height:2}
-.start-list b{color:#bcd0ea;font-weight:600}
-.btn-start{
-  margin-top:26px;background:linear-gradient(135deg,#1a73e8,#4c9aff);color:#fff;border:0;
-  padding:14px 40px;border-radius:30px;font-size:15px;font-weight:600;letter-spacing:.6px;cursor:pointer;
-  box-shadow:0 10px 26px rgba(26,115,232,.45);transition:transform .18s, box-shadow .18s;
-}
-.btn-start:hover{transform:translateY(-2px);box-shadow:0 16px 34px rgba(26,115,232,.55)}
-.btn-start:active{transform:translateY(0)}
-.link-reset{
-  margin-top:16px;background:none;border:0;color:#5a6b84;font-size:11px;letter-spacing:1.6px;
-  cursor:pointer;text-transform:uppercase;
-}
-.link-reset:hover{color:#9fb3ce;text-decoration:underline}
-
-/* ============================================================
-   5. GOOGLE DRIVE UI
-   ============================================================ */
-.gd-header{
-  flex:0 0 auto;background:#fff;padding:9px 12px 10px;border-bottom:1px solid var(--gline);
-  display:flex;align-items:center;gap:9px;position:sticky;top:0;z-index:20;
-}
-.gd-hamb{font-size:19px;color:var(--ggrey);cursor:pointer;padding:5px 6px;border-radius:50%;transition:background .15s}
-.gd-hamb:hover{background:#f1f3f4}
-.gd-search{
-  flex:1;display:flex;align-items:center;gap:8px;background:#f1f3f4;border-radius:22px;padding:8px 13px;
-  transition:box-shadow .2s, background .2s;
-}
-.gd-search:focus-within{background:#fff;box-shadow:0 1px 6px rgba(32,33,36,.28)}
-.gd-search input{border:0;background:transparent;outline:none;font-size:13px;width:100%;color:var(--ink)}
-.gd-avatar{
-  width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#d93025,#f9ab00);
-  color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700;flex:0 0 auto;
-}
-.gd-logo{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--ggrey);font-weight:500}
-
-.gd-chips{display:flex;gap:8px;padding:11px 14px 4px;flex-wrap:wrap}
-.chip{
-  font-size:11.5px;border:1px solid var(--gline);border-radius:8px;padding:5px 12px;color:var(--ggrey);
-  background:#fff;cursor:default;
-}
-.chip.active{background:#e8f0fe;border-color:#d2e3fc;color:var(--gblue-d);font-weight:600}
-
-.gd-body{flex:1;padding:4px 14px 14px}
-.gd-crumb{font-size:17px;font-weight:600;color:var(--ink);padding:12px 2px 2px;display:flex;align-items:center;gap:6px}
-.gd-sub{font-size:11px;color:var(--ggrey);padding:0 2px 12px;letter-spacing:.2px}
-
-.file-list{display:flex;flex-direction:column;gap:9px}
-.file-card{
-  display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--gline);
-  border-radius:12px;padding:12px;cursor:pointer;position:relative;overflow:hidden;
-  transition:box-shadow .2s, transform .18s, border-color .2s;
-}
-.file-card:hover{box-shadow:0 4px 14px rgba(32,33,36,.16);transform:translateY(-2px);border-color:#c6d4ea}
-.file-card:active{transform:translateY(0)}
-.file-card.done{border-color:#b7e1c4;background:linear-gradient(90deg,#f3fbf5,#fff 45%)}
-.file-ico{
-  width:38px;height:38px;border-radius:8px;flex:0 0 auto;display:grid;place-items:center;
-  color:#fff;font-size:16px;font-weight:700;
-}
-.ico-1{background:linear-gradient(145deg,#4285f4,#1a73e8)}
-.ico-2{background:linear-gradient(145deg,#34a853,#188038)}
-.ico-3{background:linear-gradient(145deg,#a142f4,#7627bb)}
-.ico-4{background:linear-gradient(145deg,#f9ab00,#e37400)}
-.file-meta{flex:1;min-width:0}
-.file-name{font-size:13.5px;color:var(--ink);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.file-info{font-size:11px;color:var(--ggrey);margin-top:3px}
-.file-tag{font-size:10px;padding:3px 8px;border-radius:12px;font-weight:700;letter-spacing:.4px;flex:0 0 auto}
-.tag-open{background:#e8f0fe;color:var(--gblue-d)}
-.tag-done{background:#e6f4ea;color:var(--ggreen)}
-
-.assemble-card{
-  margin-top:14px;border:1.5px dashed #1a73e8;background:linear-gradient(120deg,#eef4ff,#fff);
-  border-radius:14px;padding:15px;display:flex;align-items:center;gap:12px;cursor:pointer;
-  animation:pulseGlow 2.2s ease-in-out infinite;
-}
-@keyframes pulseGlow{0%,100%{box-shadow:0 0 0 0 rgba(26,115,232,.28)}50%{box-shadow:0 0 0 9px rgba(26,115,232,0)}}
-.assemble-card:hover{background:#e8f0fe}
-.assemble-card h4{font-size:14px;color:var(--gblue-d)}
-.assemble-card p{font-size:11px;color:var(--ggrey);margin-top:3px}
-
-/* Recovered pieces bar (persistent footer inside Drive) */
-.pieces-bar{
-  flex:0 0 auto;background:#0f1520;color:#cfe0f5;padding:11px 14px 13px;border-top:1px solid #1e2a3c;
-  position:sticky;bottom:0;z-index:20;
-}
-.pb-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
-.pb-title{font-size:10.5px;letter-spacing:2.6px;text-transform:uppercase;color:#7fd8ff}
-.pb-count{font-size:10.5px;color:#7a8ba3;letter-spacing:1px}
-.pb-slots{display:flex;gap:9px;justify-content:space-between}
-.pb-slot{
-  width:60px;height:60px;border-radius:9px;border:1px dashed #33425a;background:#131c2a;
-  display:grid;place-items:center;position:relative;overflow:hidden;
-  transition:transform .25s, border-color .25s;
-}
-.pb-slot .lock{font-size:16px;opacity:.3}
-.pb-slot.filled{border:1px solid #2f7de0;box-shadow:0 0 14px rgba(47,125,224,.4);transform:scale(1)}
-.pb-slot.pop{animation:popIn .55s cubic-bezier(.2,1.5,.4,1)}
-@keyframes popIn{0%{transform:scale(.2) rotate(-25deg);opacity:0}70%{transform:scale(1.14) rotate(5deg)}100%{transform:scale(1) rotate(0);opacity:1}}
-.pb-slot .idx{
-  position:absolute;bottom:2px;right:4px;font-size:8.5px;color:#fff;background:rgba(0,0,0,.55);
-  padding:1px 4px;border-radius:5px;letter-spacing:.5px;
-}
-
-/* ============================================================
-   6. DOCUMENT SHELL
-   ============================================================ */
-.doc-top{
-  flex:0 0 auto;background:#fff;border-bottom:1px solid var(--gline);padding:9px 10px;
-  display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:20;
-}
-.btn-back{
-  background:none;border:0;font-size:19px;color:var(--ggrey);cursor:pointer;
-  width:32px;height:32px;border-radius:50%;transition:background .15s;
-}
-.btn-back:hover{background:#f1f3f4}
-.doc-title{font-size:13.5px;font-weight:600;color:var(--ink);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.doc-diff{font-size:9.5px;letter-spacing:1.4px;color:#fff;background:var(--ggrey);padding:3px 8px;border-radius:10px}
-.d1{background:#34a853}.d2{background:#4285f4}.d3{background:#a142f4}.d4{background:#e37400}
-
-.doc-body{flex:1;padding:16px 15px 24px;background:var(--gbg)}
-.paper{
-  background:#fff;border:1px solid var(--gline);border-radius:12px;padding:16px 15px;
-  box-shadow:0 1px 3px rgba(32,33,36,.1);
-}
-.paper + .paper{margin-top:13px}
-.paper h3{font-size:14.5px;color:var(--ink);margin-bottom:4px}
-.paper .stamp{
-  display:inline-block;font-size:9px;letter-spacing:2px;color:#d93025;border:1px solid #f3c1bd;
-  padding:3px 8px;border-radius:4px;text-transform:uppercase;margin-bottom:10px;
-}
-.paper p{font-size:12.6px;line-height:1.75;color:#3c4043}
-.paper p.muted{color:#80868b;font-size:11.5px}
-.rule{height:1px;background:var(--gline);margin:13px 0}
-.clue-box{
-  background:#f1f6ff;border-left:3px solid var(--gblue);border-radius:0 8px 8px 0;
-  padding:11px 12px;font-size:12.4px;color:#1d3557;line-height:1.6;
-}
-
-.btn{
-  border:0;border-radius:24px;padding:11px 22px;font-size:13px;font-weight:600;cursor:pointer;
-  transition:transform .15s, box-shadow .18s, background .18s;letter-spacing:.3px;
-}
-.btn-primary{background:var(--gblue);color:#fff;box-shadow:0 3px 10px rgba(26,115,232,.32)}
-.btn-primary:hover{background:var(--gblue-d);transform:translateY(-1px);box-shadow:0 7px 18px rgba(26,115,232,.4)}
-.btn-ghost{background:#fff;color:var(--gblue);border:1px solid var(--gline)}
-.btn-ghost:hover{background:#f1f6ff}
-.btn-row{display:flex;gap:9px;margin-top:14px;flex-wrap:wrap}
-.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
-
-.feedback{margin-top:11px;font-size:12px;font-weight:600;min-height:17px}
-.feedback.ok{color:var(--ggreen)}
-.feedback.bad{color:var(--gred)}
-.shake{animation:shake .4s}
-@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
-
-/* ---- Doc 1 : scrambled ---- */
-.scr-row{
-  display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px dashed #e4e7ea;
-}
-.scr-row:last-of-type{border-bottom:0}
-.scr-word{
-  font-family:"Roboto Mono",ui-monospace,monospace;font-size:14px;letter-spacing:3px;color:#9334e6;
-  width:92px;flex:0 0 auto;font-weight:700;
-}
-.scr-arrow{color:#bdc1c6;font-size:13px}
-.scr-row input{
-  flex:1;min-width:0;border:1px solid var(--gline);border-radius:8px;padding:9px 11px;font-size:13px;
-  letter-spacing:2px;text-transform:uppercase;outline:none;transition:border-color .2s, box-shadow .2s;
-  font-family:"Roboto Mono",ui-monospace,monospace;color:var(--ink);background:#fff;
-}
-.scr-row input:focus{border-color:var(--gblue);box-shadow:0 0 0 3px rgba(26,115,232,.13)}
-.scr-row input.good{border-color:var(--ggreen);background:#eafaef;color:#12652c}
-.scr-row input.wrong{border-color:var(--gred);background:#fdeeec}
-
-/* ---- Doc 2 : hangman ---- */
-.hm-wrap{display:flex;gap:12px;align-items:center}
-.hm-svg{flex:0 0 auto;background:#fbfcfe;border:1px solid var(--gline);border-radius:10px}
-.hm-side{flex:1}
-.hm-lives{font-size:12px;color:var(--ggrey);margin-bottom:6px}
-.hm-hearts{font-size:14px;letter-spacing:2px}
-.hm-wrong{font-size:11px;color:var(--gred);letter-spacing:2px;min-height:15px;font-family:monospace}
-.hm-blanks{
-  display:flex;gap:7px;justify-content:center;margin:16px 0 6px;flex-wrap:wrap;
-}
-.hm-slot{
-  width:27px;height:36px;border-bottom:3px solid #9aa0a6;display:grid;place-items:center;
-  font-size:20px;font-weight:700;color:var(--ink);font-family:"Roboto Mono",monospace;
-}
-.hm-slot.rev{border-color:var(--ggreen);animation:flipIn .4s}
-@keyframes flipIn{from{transform:rotateX(90deg);opacity:0}to{transform:rotateX(0);opacity:1}}
-.kbd{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:14px}
-.key{
-  border:1px solid var(--gline);background:#fff;border-radius:7px;padding:9px 0;font-size:13px;
-  font-weight:600;color:var(--ink);cursor:pointer;transition:all .15s;
-}
-.key:hover:not(:disabled){background:#e8f0fe;border-color:#a8c7fa;transform:translateY(-1px)}
-.key:disabled{cursor:not-allowed;opacity:.85}
-.key.hit{background:#e6f4ea;border-color:#a8dab5;color:#0d652d}
-.key.miss{background:#fce8e6;border-color:#f3b8b4;color:#a50e0e;text-decoration:line-through}
-
-/* ---- Doc 3 : word search ---- */
-.ws-layout{display:flex;gap:10px;align-items:flex-start}
-.ws-grid{
-  display:grid;grid-template-columns:repeat(10,22px);gap:2px;flex:0 0 auto;
-  user-select:none;-webkit-user-select:none;
-}
-.ws-cell{
-  width:22px;height:22px;display:grid;place-items:center;font-size:11px;font-weight:700;
-  font-family:"Roboto Mono",monospace;color:#3c4043;background:#fff;border:1px solid #e6e9ec;
-  border-radius:4px;cursor:pointer;transition:all .12s;
-}
-.ws-cell:hover{background:#e8f0fe;transform:scale(1.12)}
-.ws-cell.start{background:var(--gyellow);color:#fff;border-color:#e09b00;transform:scale(1.1)}
-.ws-cell.found{background:#1e8e3e;color:#fff;border-color:#166b2e;animation:popIn .4s}
-.ws-cell.err{background:#d93025;color:#fff}
-.ws-list{flex:1;min-width:0}
-.ws-list h5{font-size:10px;letter-spacing:1.6px;color:var(--ggrey);text-transform:uppercase;margin-bottom:8px}
-.ws-word{
-  font-size:11.5px;padding:5px 7px;border-radius:6px;background:#f1f3f4;color:#3c4043;
-  margin-bottom:5px;font-weight:600;letter-spacing:.6px;transition:all .25s;
-}
-.ws-word span{display:block;font-size:9px;font-weight:400;color:#80868b;letter-spacing:0;margin-top:2px}
-.ws-word.found{background:#e6f4ea;color:#0d652d;text-decoration:line-through}
-.ws-word.found span{text-decoration:none;color:#5f6368}
-.ws-hint{font-size:10.5px;color:#80868b;margin-top:9px;line-height:1.6}
-
-/* ---- Doc 4 : sudoku ---- */
-.sk-grid{
-  display:grid;grid-template-columns:repeat(4,46px);grid-template-rows:repeat(4,46px);gap:0;
-  margin:6px auto 4px;width:max-content;border:2.5px solid #202124;border-radius:8px;overflow:hidden;
-}
-.sk-cell{
-  border:1px solid #dadce0;display:grid;place-items:center;background:#fff;position:relative;
-}
-.sk-cell:nth-child(4n+2){border-right:2.5px solid #202124}
-.sk-cell:nth-child(n+5):nth-child(-n+8){border-bottom:2.5px solid #202124}
-.sk-cell input{
-  width:100%;height:100%;border:0;outline:none;text-align:center;font-size:21px;font-weight:700;
-  color:var(--gblue-d);background:transparent;font-family:"Roboto Mono",monospace;
-}
-.sk-cell input:focus{background:#e8f0fe}
-.sk-cell.given{background:#f1f3f4}
-.sk-cell.given span{font-size:21px;font-weight:800;color:#202124;font-family:"Roboto Mono",monospace}
-.sk-cell.bad{background:#fce8e6;animation:shake .4s}
-.sk-cell.solved{background:#e6f4ea}
-.sk-legend{text-align:center;font-size:11px;color:var(--ggrey);margin-top:6px;line-height:1.7}
-
-/* ============================================================
-   7. THE HIDDEN COMPOSITE IMAGE (300 x 300 base)
-   ============================================================ */
-.piece{position:relative;overflow:hidden;border-radius:6px;background:#050a12}
-.piece-inner{position:absolute;top:0;left:0;width:300px;height:300px;transform-origin:0 0}
-
-.ci-full{
-  position:absolute;inset:0;width:300px;height:300px;overflow:hidden;
-  background:
-    radial-gradient(360px 260px at 50% 45%, #16273f 0%, #0a1220 60%, #060a12 100%);
-  font-family:"Roboto Mono",ui-monospace,monospace;color:#dbe9ff;
-}
-.ci-grid{
-  position:absolute;inset:0;
-  background-image:
-    linear-gradient(rgba(127,216,255,.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(127,216,255,.07) 1px, transparent 1px);
-  background-size:25px 25px;
-}
-.ci-vign{position:absolute;inset:0;box-shadow:inset 0 0 60px rgba(0,0,0,.85)}
-.ci-mark{position:absolute;width:26px;height:26px;border:2px solid rgba(127,216,255,.5)}
-.ci-mark.tl{top:9px;left:9px;border-right:0;border-bottom:0}
-.ci-mark.tr{top:9px;right:9px;border-left:0;border-bottom:0}
-.ci-mark.bl{bottom:9px;left:9px;border-right:0;border-top:0}
-.ci-mark.br{bottom:9px;right:9px;border-left:0;border-top:0}
-.ci-head{
-  position:absolute;top:26px;left:0;right:0;text-align:center;font-size:9px;letter-spacing:3.4px;
-  color:#7fd8ff;text-transform:uppercase;
-}
-.ci-dash{position:absolute;top:46px;left:34px;right:34px;border-top:1px dashed rgba(127,216,255,.35)}
-.ci-wm{
-  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-28deg);
-  font-size:52px;font-weight:800;letter-spacing:12px;color:rgba(255,255,255,.045);white-space:nowrap;
-}
-.ci-band{
-  position:absolute;top:124px;left:0;right:0;height:52px;display:flex;align-items:center;
-  justify-content:space-between;padding:0 16px;
-}
-.ci-num{
-  font-size:26px;font-weight:800;color:#ffd66b;letter-spacing:1px;
-  text-shadow:0 0 14px rgba(255,214,107,.55);
-}
-.ci-tick{position:absolute;top:104px;left:16px;right:16px;display:flex;justify-content:space-between}
-.ci-tick i{width:1px;height:8px;background:rgba(127,216,255,.45);display:block}
-.ci-q{
-  position:absolute;top:200px;left:0;right:0;text-align:center;font-size:13.5px;font-weight:800;
-  letter-spacing:2.2px;color:#ffffff;
-}
-.ci-note{
-  position:absolute;top:226px;left:0;right:0;text-align:center;font-size:8.5px;letter-spacing:2.4px;
-  color:#6e88a8;text-transform:uppercase;
-}
-.ci-circ{
-  position:absolute;width:42px;height:42px;border-radius:50%;border:1px solid rgba(127,216,255,.28);
-}
-.ci-circ.a{top:58px;left:30px}
-.ci-circ.b{top:236px;right:26px;width:30px;height:30px}
-.ci-glyph{position:absolute;font-size:15px;color:rgba(127,216,255,.5)}
-.ci-glyph.g1{top:68px;left:41px}
-.ci-glyph.g2{top:64px;right:36px;font-size:13px;letter-spacing:2px}
-.ci-glyph.g3{bottom:20px;left:30px;font-size:8px;letter-spacing:2.4px;color:rgba(255,255,255,.3)}
-.ci-glyph.g4{bottom:22px;right:30px;font-size:8px;letter-spacing:2.4px;color:rgba(255,255,255,.3)}
-.ci-seam{position:absolute;background:rgba(127,216,255,.10)}
-
-/* ============================================================
-   8. ASSEMBLE / FINAL / COMPLETE
-   ============================================================ */
-.dark-view{background:radial-gradient(500px 420px at 50% 20%,#14223a,#070b13 75%);color:#dce6f5}
-.dark-top{
-  flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:10px;border-bottom:1px solid #1d2939;
-}
-.dark-top .btn-back{color:#8aa0bd}
-.dark-top .btn-back:hover{background:#18243a}
-.dark-top .doc-title{color:#e8f1ff}
-.dark-body{flex:1;padding:16px 16px 26px;text-align:center}
-.dark-body h3{font-size:16px;color:#fff;letter-spacing:.6px;margin-bottom:8px}
-.dark-body p.sm{font-size:12px;color:#8ea3bf;line-height:1.7;max-width:300px;margin:0 auto}
-
-.assembly-stage{
-  position:relative;width:300px;height:300px;margin:20px auto 6px;
-}
-.slot{position:absolute;width:150px;height:150px;transition:transform .95s cubic-bezier(.22,1.1,.3,1), opacity .5s;}
-.slot .piece{width:150px;height:150px;border-radius:4px;box-shadow:0 8px 24px rgba(0,0,0,.6)}
-.assembly-stage.done .slot{transform:none !important}
-.assembly-stage.done .slot .piece{box-shadow:none;border-radius:0}
-.frame-glow{
-  position:absolute;inset:-9px;border:1px solid rgba(127,216,255,.35);border-radius:10px;opacity:0;
-  transition:opacity .6s .9s;pointer-events:none;
-}
-.assembly-stage.done .frame-glow{opacity:1;box-shadow:0 0 40px rgba(127,216,255,.25)}
-
-.final-image-holder{
-  width:300px;margin:16px auto;position:relative;border-radius:8px;overflow:hidden;
-  box-shadow:0 14px 40px rgba(0,0,0,.65), 0 0 0 1px rgba(127,216,255,.25);
-  animation:popIn .6s;
-}
-.final-image-holder .piece{width:300px;height:300px;border-radius:0}
-.final-image-holder .piece-inner{transform:none}
-
-.answer-box{margin:14px auto 0;max-width:300px}
-.answer-box label{display:block;font-size:10.5px;letter-spacing:2.2px;color:#7fd8ff;text-transform:uppercase;margin-bottom:8px}
-.answer-box input{
-  width:100%;padding:13px 15px;border-radius:11px;border:1px solid #2b3c55;background:#0d1522;
-  color:#e9f2ff;font-size:16px;letter-spacing:3px;text-align:center;outline:none;
-  font-family:"Roboto Mono",monospace;transition:border-color .2s, box-shadow .2s;
-}
-.answer-box input:focus{border-color:#4c9aff;box-shadow:0 0 0 3px rgba(76,154,255,.18)}
-.msg{margin-top:11px;font-size:12.5px;font-weight:600;min-height:18px}
-.msg.bad{color:#ff7b72}.msg.ok{color:#7ee2a0}
-
-#view-complete{align-items:center;justify-content:center;text-align:center;padding:26px}
-.trophy{font-size:58px;animation:popIn .8s}
-.complete-time{
-  font-family:"Roboto Mono",monospace;font-size:38px;color:#7fd8ff;letter-spacing:3px;margin:8px 0 2px;
-  text-shadow:0 0 26px rgba(127,216,255,.45);
-}
-.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:20px auto 0;max-width:300px}
-.stat{background:#101a2a;border:1px solid #1e2c40;border-radius:10px;padding:10px}
-.stat b{display:block;font-size:15px;color:#e9f2ff}
-.stat span{font-size:9.5px;letter-spacing:1.6px;color:#6e829c;text-transform:uppercase}
-
-/* ============================================================
-   9. MODAL / TOAST
-   ============================================================ */
-.modal-wrap{
-  position:absolute;inset:0;z-index:80;display:none;align-items:center;justify-content:center;
-  background:rgba(6,10,18,.74);backdrop-filter:blur(3px);padding:24px;
-}
-.modal-wrap.show{display:flex;animation:fadeIn .25s}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.modal{
-  background:#fff;border-radius:18px;padding:22px 20px;text-align:center;width:100%;max-width:290px;
-  animation:popIn .5s;position:relative;overflow:hidden;
-}
-.modal .big{font-size:44px;animation:spinPop .7s}
-@keyframes spinPop{0%{transform:scale(0) rotate(-180deg)}70%{transform:scale(1.2) rotate(12deg)}100%{transform:scale(1) rotate(0)}}
-.modal h4{font-size:16px;color:var(--ink);margin:10px 0 6px}
-.modal p{font-size:12px;color:var(--ggrey);line-height:1.6}
-.modal .preview{margin:14px auto 4px;width:110px;height:110px;border-radius:8px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,.25)}
-.confetti{position:absolute;width:7px;height:11px;top:-14px;opacity:.95;animation:fall 1.5s linear forwards}
-@keyframes fall{to{transform:translateY(300px) rotate(540deg);opacity:0}}
-
-#toast{
-  position:absolute;left:50%;bottom:22px;transform:translate(-50%,24px);z-index:90;
-  background:#202124;color:#fff;font-size:12px;padding:10px 18px;border-radius:24px;
-  opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;max-width:88%;
-}
-#toast.show{opacity:1;transform:translate(-50%,0)}
-
-/* ============================================================
-   10. RESPONSIVE
-   ============================================================ */
-@media (max-width:470px){ .phone-wrap{transform:scale(.88)} .page-foot{margin-top:-60px} }
-@media (max-width:420px){ .phone-wrap{transform:scale(.8)}  .page-foot{margin-top:-105px} }
-@media (max-width:370px){ .phone-wrap{transform:scale(.72)} .page-foot{margin-top:-150px} }
-@media (max-height:880px) and (min-width:471px){ .phone-wrap{transform:scale(.92)} }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Case 0447 — Drive Investigation</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<div class="page-head">
-  <h1>Case File 0447</h1>
-</div>
+  <div class="page-head">
+    <h1>Case File 0447</h1>
+  </div>
 
-<div class="phone-wrap">
-<div class="phone">
-  <div class="phone-screen">
-    <div class="notch"></div>
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="phone-screen">
+        <div class="notch"></div>
 
-    <!-- STATUS BAR (timer always visible) -->
-    <div class="status-bar">
-      <span>9:41</span>
-      <span class="timer-chip" id="timerChip">00:00</span>
-      <span class="sb-right">▮▮▮ 78%</span>
-    </div>
-
-    <div class="views">
-
-      <!-- ============ START ============ -->
-      <section id="view-start" class="view active">
-        <div class="start-phone-ico">📱</div>
-        <h2>Device Recovered</h2>
-        <p class="lead">A phone has been found. Investigate the Google Drive files to uncover the truth.</p>
-        <div class="start-list">
-          <div>▸ <b>4 documents</b> remain on the account</div>
-          <div>▸ Each document hides <b>one puzzle piece</b></div>
-          <div>▸ Assemble all pieces to reveal the final clue</div>
-          <div>▸ Your <b>time is being recorded</b></div>
-        </div>
-        <button class="btn-start" id="btnStart">Start Game</button>
-        <button class="link-reset" id="btnResetStart">Clear saved progress</button>
-      </section>
-
-      <!-- ============ MY DRIVE ============ -->
-      <section id="view-drive" class="view">
-        <div class="gd-header">
-          <div class="gd-hamb">☰</div>
-          <div class="gd-search">
-            <span style="font-size:13px;color:#5f6368">🔍</span>
-            <input id="driveSearch" placeholder="Search in Drive" autocomplete="off"/>
-          </div>
-          <div class="gd-avatar">K</div>
+        <!-- STATUS BAR (timer always visible) -->
+        <div class="status-bar">
+          <span>9:41</span>
+          <span class="timer-chip" id="timerChip">00:00</span>
+          <span class="sb-right">▮▮▮ 78%</span>
         </div>
 
-        <div class="gd-chips">
-          <span class="chip active">Files</span>
-          <span class="chip">Type</span>
-          <span class="chip">People</span>
-          <span class="chip">Modified</span>
-        </div>
+        <div class="views">
 
-        <div class="gd-body">
-          <div class="gd-crumb">📁 My Drive</div>
-          <div class="gd-sub">Owner: device account · 4 items · Synced 2 days ago</div>
-          <div class="file-list" id="fileList"><!-- injected --></div>
-          <div class="assemble-card" id="assembleCard" style="display:none">
-            <div class="file-ico" style="background:linear-gradient(145deg,#1a73e8,#7627bb)">🧩</div>
-            <div class="file-meta">
-              <h4>Assemble Puzzle</h4>
-              <p>All 4 fragments recovered — reconstruct the image</p>
+          <!-- ============ START ============ -->
+          <section id="view-start" class="view active">
+            <div class="start-phone-ico">📱</div>
+            <h2>Device Recovered</h2>
+            <p class="lead">A phone has been found. Investigate the Google Drive files to uncover the truth.</p>
+            <div class="start-list">
+              <div>▸ <b>4 documents</b> remain on the account</div>
+              <div>▸ Each document hides <b>one puzzle piece</b></div>
+              <div>▸ Assemble all pieces to reveal the final clue</div>
+              <div>▸ Your <b>time is being recorded</b></div>
             </div>
-            <span class="file-tag tag-open">READY</span>
-          </div>
-        </div>
+            <button class="btn-start" id="btnStart">Start Game</button>
+            <button class="link-reset" id="btnResetStart">Clear saved progress</button>
+          </section>
 
-        <!-- Recovered pieces footer -->
-        <div class="pieces-bar">
-          <div class="pb-top">
-            <div class="pb-title">Recovered Pieces</div>
-            <div class="pb-count" id="pbCount">0 / 4</div>
-          </div>
-          <div class="pb-slots" id="pbSlots"></div>
-        </div>
-      </section>
-
-      <!-- ============ DOC 1 ============ -->
-      <section id="view-doc1" class="view">
-        <div class="doc-top">
-          <button class="btn-back" data-back>←</button>
-          <div class="doc-title">Travel_Notes.doc</div>
-          <span class="doc-diff d1">LEVEL 1</span>
-        </div>
-        <div class="doc-body">
-          <div class="paper">
-            <h3>Entry 14</h3>
-            <p class="muted">Last edited 2 days ago</p>
-            <div class="rule"></div>
-            <p><b>"I don't know why, but lately I've been feeling like someone is following me. Yesterday, I decided to leave for a while and take the old route I used to visit when I needed some time alone.
-                   I remember the velrat was longer than usual. I followed the same htap I had taken many times before. The sky was completely elub, and before heading further, I stopped at my usual ecaf.
-                   Something felt different that day. I had a feeling I shouldn't stay there for too long.”</b></p>
-            <p>Some words in the message seem to be damaged.
-              Restore the corrupted words to recover the missing information.
-            </p>
-            <div class="rule"></div>
-            <div id="scrRows"></div>
-            <div class="btn-row">
-              <button class="btn btn-primary" id="d1Check">Check Answers</button>
-              <button class="btn btn-ghost" id="d1Clear">Clear</button>
+          <!-- ============ MY DRIVE ============ -->
+          <section id="view-drive" class="view">
+            <div class="gd-header">
+              <div class="gd-hamb">☰</div>
+              <div class="gd-search">
+                <span style="font-size:13px;color:#5f6368">🔍</span>
+                <input id="driveSearch" placeholder="Search in Drive" autocomplete="off"/>
+              </div>
+              <div class="gd-avatar">K</div>
             </div>
-            <div class="feedback" id="d1Msg"></div>
-          </div>
-        </div>
-      </section>
 
-      <!-- ============ DOC 2 ============ -->
-      <section id="view-doc2" class="view">
-        <div class="doc-top">
-          <button class="btn-back" data-back>←</button>
-          <div class="doc-title">Stranger.doc</div>
-          <span class="doc-diff d2">LEVEL 2</span>
-        </div>
-        <div class="doc-body">
-          <div class="paper">
-            <h3>Stranger</h3>
-            <p class="muted">Audio damaged — one keyword unreadable</p>
-            <div class="rule"></div>
-            <div class="clue-box">“I thought being surrounded by people would make me feel safer, but the feeling of being watched never left.
-I noticed the same person near the entrance. I moved to another platform, and somehow they appeared there too.My train was about to arrive. I was supposed to leave on the next _ _ _ _ _ _ _, but I suddenly noticed the person standing at the end of the platform.
-They weren't looking at me.They were looking at the notebook in my hand.I decided not to board the train. Before leaving, I quickly wrote down the numbers I had been studying.I still haven't figured out why one of them doesn't fit..”<br>
-              <b>Clue:</b> A place where people wait for transport.</div>
+            <div class="gd-chips">
+              <span class="chip active">Files</span>
+              <span class="chip">Type</span>
+              <span class="chip">People</span>
+              <span class="chip">Modified</span>
+            </div>
 
-            <div class="hm-blanks" id="hmBlanks"></div>
-
-            <div class="hm-wrap">
-              <svg class="hm-svg" id="hmSvg" width="112" height="128" viewBox="0 0 112 128"></svg>
-              <div class="hm-side">
-                <div class="hm-lives">Attempts remaining</div>
-                <div class="hm-hearts" id="hmHearts"></div>
-                <div style="height:8px"></div>
-                <div class="hm-lives">Wrong letters</div>
-                <div class="hm-wrong" id="hmWrong">—</div>
+            <div class="gd-body">
+              <div class="gd-crumb">📁 My Drive</div>
+              <div class="gd-sub">Owner: device account · 4 items · Synced 2 days ago</div>
+              <div class="file-list" id="fileList"><!-- injected --></div>
+              <div class="assemble-card" id="assembleCard" style="display:none">
+                <div class="file-ico" style="background:linear-gradient(145deg,#1a73e8,#7627bb)">🧩</div>
+                <div class="file-meta">
+                  <h4>Assemble Puzzle</h4>
+                  <p>All 4 fragments recovered — reconstruct the image</p>
+                </div>
+                <span class="file-tag tag-open">READY</span>
               </div>
             </div>
 
-            <div class="kbd" id="hmKbd"></div>
-            <div class="feedback" id="d2Msg"></div>
-          </div>
-        </div>
-      </section>
+            <!-- Recovered pieces footer -->
+            <div class="pieces-bar">
+              <div class="pb-top">
+                <div class="pb-title">Recovered Pieces</div>
+                <div class="pb-count" id="pbCount">0 / 4</div>
+              </div>
+              <div class="pb-slots" id="pbSlots"></div>
+            </div>
+          </section>
 
-      <!-- ============ DOC 3 ============ -->
-      <section id="view-doc3" class="view">
-        <div class="doc-top">
-          <button class="btn-back" data-back>←</button>
-          <div class="doc-title">Personal_Notes.doc</div>
-          <span class="doc-diff d3">LEVEL 3</span>
-        </div>
-        <div class="doc-body">
-          <div class="paper">
-            <h3>Cross-Reference Grid</h3>
-            <p class="muted">Five terms were embedded in the board by the missing person.</p>
-            <div class="rule"></div>
-            <div class="ws-layout">
-              <div class="ws-grid" id="wsGrid"></div>
-              <div class="ws-list">
-                <h5>Words to look for</h5>
-                <div id="wsWords"></div>
+          <!-- ============ DOC 1 ============ -->
+          <section id="view-doc1" class="view">
+            <div class="doc-top">
+              <button class="btn-back" data-back>←</button>
+              <div class="doc-title">Travel_Notes.doc</div>
+              <span class="doc-diff d1">LEVEL 1</span>
+            </div>
+            <div class="doc-body">
+              <div class="paper">
+                <h3>Entry 14</h3>
+                <p class="muted">Last edited 2 days ago</p>
+                <div class="rule"></div>
+                <p><b>"I don't know why, but lately I've been feeling like someone is following me. Yesterday, I decided to leave for a while and take the old route I used to visit when I needed some time alone.
+                       I remember the velrat was longer than usual. I followed the same htap I had taken many times before. The sky was completely elub, and before heading further, I stopped at my usual ecaf.
+                       Something felt different that day. I had a feeling I shouldn't stay there for too long.”</b></p>
+                <p>Some words in the message seem to be damaged.
+                  Restore the corrupted words to recover the missing information.
+                </p>
+                <div class="rule"></div>
+                <div id="scrRows"></div>
+                <div class="btn-row">
+                  <button class="btn btn-primary" id="d1Check">Check Answers</button>
+                  <button class="btn btn-ghost" id="d1Clear">Clear</button>
+                </div>
+                <div class="feedback" id="d1Msg"></div>
               </div>
             </div>
-            <div class="ws-hint">
-              Tap the <b>first letter</b>, then tap the <b>last letter</b> of a word.<br>
-              Words run horizontally, vertically, diagonally — and some backwards.
+          </section>
+
+          <!-- ============ DOC 2 ============ -->
+          <section id="view-doc2" class="view">
+            <div class="doc-top">
+              <button class="btn-back" data-back>←</button>
+              <div class="doc-title">Stranger.doc</div>
+              <span class="doc-diff d2">LEVEL 2</span>
             </div>
-            <div class="btn-row">
-              <button class="btn btn-ghost" id="d3Reset">Reset selection</button>
+            <div class="doc-body">
+              <div class="paper">
+                <h3>Stranger</h3>
+                <p class="muted">Audio damaged — one keyword unreadable</p>
+                <div class="rule"></div>
+                <div class="clue-box">“I thought being surrounded by people would make me feel safer, but the feeling of being watched never left.
+    I noticed the same person near the entrance. I moved to another platform, and somehow they appeared there too. My train was about to arrive. I was supposed to leave on the next _ _ _ _ _ _ _, but I suddenly noticed the person standing at the end of the platform.
+    They weren't looking at me. They were looking at the notebook in my hand. I decided not to board the train. Before leaving, I quickly wrote down the numbers I had been studying. I still haven't figured out why one of them doesn't fit..”<br>
+                  <b>Clue:</b> A place where people wait for transport.</div>
+
+                <div class="hm-blanks" id="hmBlanks"></div>
+
+                <div class="hm-wrap">
+                  <svg class="hm-svg" id="hmSvg" width="112" height="128" viewBox="0 0 112 128"></svg>
+                  <div class="hm-side">
+                    <div class="hm-lives">Attempts remaining</div>
+                    <div class="hm-hearts" id="hmHearts"></div>
+                    <div style="height:8px"></div>
+                    <div class="hm-lives">Wrong letters</div>
+                    <div class="hm-wrong" id="hmWrong">—</div>
+                  </div>
+                </div>
+
+                <div class="kbd" id="hmKbd"></div>
+                <div class="feedback" id="d2Msg"></div>
+              </div>
             </div>
-            <div class="feedback" id="d3Msg"></div>
-          </div>
-        </div>
-      </section>
+          </section>
 
-      <!-- ============ DOC 4 ============ -->
-      <section id="view-doc4" class="view">
-        <div class="doc-top">
-          <button class="btn-back" data-back>←</button>
-          <div class="doc-title">Cipher_Log.doc</div>
-          <span class="doc-diff d4">LEVEL 4</span>
-        </div>
-        <div class="doc-body">
-          <div class="paper">
-            <h3>Encrypted Index</h3>
-            <p class="muted">The last fragment is stored behind a completed matrix.</p>
-            <div class="rule"></div>
-            <p><b>"I don't know who they are, or what they want from me.I've hidden one last clue in this document.If you're reading this, you have probably already found the first three pieces.Solve the grid."</b></p>
-            <p>Fill every empty cell with <b>1–4</b> so that each <b>row</b>, each <b>column</b>
-               and each <b>2×2 block</b> contains 1, 2, 3 and 4 exactly once.</p>
-            <div class="sk-grid" id="skGrid"></div>
-            <div class="sk-legend">Bold cells are fixed by the cipher and cannot change.</div>
-            <div class="btn-row">
-              <button class="btn btn-primary" id="d4Check">Verify Matrix</button>
-              <button class="btn btn-ghost" id="d4Clear">Clear Entries</button>
+          <!-- ============ DOC 3 ============ -->
+          <section id="view-doc3" class="view">
+            <div class="doc-top">
+              <button class="btn-back" data-back>←</button>
+              <div class="doc-title">Personal_Notes.doc</div>
+              <span class="doc-diff d3">LEVEL 3</span>
             </div>
-            <div class="feedback" id="d4Msg"></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ============ ASSEMBLE ============ -->
-      <section id="view-assemble" class="view dark-view">
-        <div class="dark-top">
-          <button class="btn-back" data-back>←</button>
-          <div class="doc-title">Fragment Reconstruction</div>
-        </div>
-        <div class="dark-body">
-          <h3 id="asmTitle">Four fragments recovered</h3>
-          <p class="sm" id="asmSub">Align the fragments to rebuild the original evidence photo.</p>
-          <div class="assembly-stage" id="asmStage">
-            <div class="frame-glow"></div>
-          </div>
-          <div class="btn-row" style="justify-content:center">
-            <button class="btn btn-primary" id="btnAssemble">Assemble Puzzle</button>
-            <button class="btn btn-ghost" id="btnToFinal" style="display:none">Read the clue →</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- ============ FINAL QUESTION ============ -->
-      <section id="view-final" class="view dark-view">
-        <div class="dark-top">
-          <button class="btn-back" data-back-assemble>←</button>
-          <div class="doc-title">Final Clue</div>
-        </div>
-        <div class="dark-body">
-          <h3>The pieces reveal one final clue.</h3>
-          <p class="sm">Solve it to continue.</p>
-          <div class="final-image-holder" id="finalImage"></div>
-          <div class="answer-box">
-            <label for="finalInput">Enter your answer</label>
-            <input id="finalInput" placeholder="…" autocomplete="off" />
-            <div class="btn-row" style="justify-content:center">
-              <button class="btn btn-primary" id="btnSubmitFinal">Submit Answer</button>
+            <div class="doc-body">
+              <div class="paper">
+                <h3>Cross-Reference Grid</h3>
+                <p class="muted">Five terms were embedded in the board by the missing person.</p>
+                <div class="rule"></div>
+                <div class="ws-layout">
+                  <div class="ws-grid" id="wsGrid"></div>
+                  <div class="ws-list">
+                    <h5>Words to look for</h5>
+                    <div id="wsWords"></div>
+                  </div>
+                </div>
+                <div class="ws-hint">
+                  Tap the <b>first letter</b>, then tap the <b>last letter</b> of a word.<br>
+                  Words run horizontally, vertically, diagonally — and some backwards.
+                </div>
+                <div class="btn-row">
+                  <button class="btn btn-ghost" id="d3Reset">Reset selection</button>
+                </div>
+                <div class="feedback" id="d3Msg"></div>
+              </div>
             </div>
-            <div class="msg" id="finalMsg"></div>
-          </div>
+          </section>
+
+          <!-- ============ DOC 4 ============ -->
+          <section id="view-doc4" class="view">
+            <div class="doc-top">
+              <button class="btn-back" data-back>←</button>
+              <div class="doc-title">Cipher_Log.doc</div>
+              <span class="doc-diff d4">LEVEL 4</span>
+            </div>
+            <div class="doc-body">
+              <div class="paper">
+                <h3>Encrypted Index</h3>
+                <p class="muted">The last fragment is stored behind a completed matrix.</p>
+                <div class="rule"></div>
+                <p><b>"I don't know who they are, or what they want from me. I've hidden one last clue in this document. If you're reading this, you have probably already found the first three pieces. Solve the grid."</b></p>
+                <p>Fill every empty cell with <b>1–4</b> so that each <b>row</b>, each <b>column</b>
+                   and each <b>2×2 block</b> contains 1, 2, 3 and 4 exactly once.</p>
+                <div class="sk-grid" id="skGrid"></div>
+                <div class="sk-legend">Bold cells are fixed by the cipher and cannot change.</div>
+                <div class="btn-row">
+                  <button class="btn btn-primary" id="d4Check">Verify Matrix</button>
+                  <button class="btn btn-ghost" id="d4Clear">Clear Entries</button>
+                </div>
+                <div class="feedback" id="d4Msg"></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ============ ASSEMBLE ============ -->
+          <section id="view-assemble" class="view dark-view">
+            <div class="dark-top">
+              <button class="btn-back" data-back>←</button>
+              <div class="doc-title">Fragment Reconstruction</div>
+            </div>
+            <div class="dark-body">
+              <h3 id="asmTitle">Four fragments recovered</h3>
+              <p class="sm" id="asmSub">Align the fragments to rebuild the original evidence photo.</p>
+              <div class="assembly-stage" id="asmStage">
+                <div class="frame-glow"></div>
+              </div>
+              <div class="btn-row" style="justify-content:center">
+                <button class="btn btn-primary" id="btnAssemble">Assemble Puzzle</button>
+                <button class="btn btn-ghost" id="btnToFinal" style="display:none">Read the clue →</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- ============ FINAL QUESTION ============ -->
+          <section id="view-final" class="view dark-view">
+            <div class="dark-top">
+              <button class="btn-back" data-back-assemble>←</button>
+              <div class="doc-title">Final Clue</div>
+            </div>
+            <div class="dark-body">
+              <h3>The pieces reveal one final clue.</h3>
+              <p class="sm">Solve it to continue.</p>
+              <div class="final-image-holder" id="finalImage"></div>
+              <div class="answer-box">
+                <label for="finalInput">Enter your answer</label>
+                <input id="finalInput" placeholder="…" autocomplete="off" />
+                <div class="btn-row" style="justify-content:center">
+                  <button class="btn btn-primary" id="btnSubmitFinal">Submit Answer</button>
+                </div>
+                <div class="msg" id="finalMsg"></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ============ COMPLETE ============ -->
+          <section id="view-complete" class="view dark-view">
+            <div class="trophy">🗝️</div>
+            <h3 style="font-size:21px;color:#fff;letter-spacing:1.2px;margin-top:10px">Investigation Complete</h3>
+            <p class="sm" style="margin-top:8px">Every fragment recovered. The final clue has been broken.</p>
+            <div class="complete-time" id="finalTime">00:00</div>
+            <div style="font-size:10px;letter-spacing:3px;color:#6e829c;text-transform:uppercase">Total completion time</div>
+            <div class="stat-grid">
+              <div class="stat"><b>4 / 4</b><span>Documents</span></div>
+              <div class="stat"><b>4 / 4</b><span>Fragments</span></div>
+              <div class="stat"><b>0447</b><span>Case ID</span></div>
+              <div class="stat"><b>Closed</b><span>Status</span></div>
+            </div>
+            <div class="btn-row" style="justify-content:center;margin-top:22px">
+              <button class="btn btn-primary" id="btnPlayAgain">New Investigation</button>
+            </div>
+          </section>
+
+        </div><!-- /views -->
+
+        <div id="toast"></div>
+
+        <!-- MODAL -->
+        <div class="modal-wrap" id="modalWrap">
+          <div class="modal" id="modalBox"></div>
         </div>
-      </section>
 
-      <!-- ============ COMPLETE ============ -->
-      <section id="view-complete" class="view dark-view">
-        <div class="trophy">🗝️</div>
-        <h3 style="font-size:21px;color:#fff;letter-spacing:1.2px;margin-top:10px">Investigation Complete</h3>
-        <p class="sm" style="margin-top:8px">Every fragment recovered. The final clue has been broken.</p>
-        <div class="complete-time" id="finalTime">00:00</div>
-        <div style="font-size:10px;letter-spacing:3px;color:#6e829c;text-transform:uppercase">Total completion time</div>
-        <div class="stat-grid">
-          <div class="stat"><b>4 / 4</b><span>Documents</span></div>
-          <div class="stat"><b>4 / 4</b><span>Fragments</span></div>
-          <div class="stat"><b>0447</b><span>Case ID</span></div>
-          <div class="stat"><b>Closed</b><span>Status</span></div>
-        </div>
-        <div class="btn-row" style="justify-content:center;margin-top:22px">
-          <button class="btn btn-primary" id="btnPlayAgain">New Investigation</button>
-        </div>
-      </section>
+      </div><!-- /phone-screen -->
+    </div><!-- /phone -->
+  </div><!-- /phone-wrap -->
 
-    </div><!-- /views -->
-
-    <div id="toast"></div>
-
-    <!-- MODAL -->
-    <div class="modal-wrap" id="modalWrap">
-      <div class="modal" id="modalBox"></div>
-    </div>
-
-  </div><!-- /phone-screen -->
-</div><!-- /phone -->
-</div><!-- /phone-wrap -->
-
-<script>
-/* ==================================================================
-   GOOGLE DRIVE INVESTIGATION — GAME SCRIPT
-   Sections:
-     A. State + localStorage
-     B. Timer
-     C. Navigation
-     D. Composite image + puzzle pieces
-     E. Drive UI
-     F. Doc 1 — Scrambled words
-     G. Doc 2 — Hangman
-     H. Doc 3 — Word search
-     I. Doc 4 — Mini sudoku (4x4)
-     J. Assembly + final question + completion
-   ================================================================== */
-
-/* ---------- A. STATE ---------- */
-const STORE_KEY = 'gdrive_investigation_v1';
-const DEFAULT_STATE = {
-  started:false, startTime:null, endTime:null,
-  solved:[false,false,false,false],
-  assembled:false, finished:false
-};
-let S = {...DEFAULT_STATE};
-
-function save(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(S)); }catch(e){} }
-function load(){
-  try{
-    const raw = localStorage.getItem(STORE_KEY);
-    if(raw){ const p = JSON.parse(raw); if(p && typeof p==='object') S = {...DEFAULT_STATE, ...p}; }
-  }catch(e){ S = {...DEFAULT_STATE}; }
-}
-function resetAll(){
-  try{ localStorage.removeItem(STORE_KEY); }catch(e){}
-  S = {...DEFAULT_STATE};
-  location.reload();
-}
-
-/* ---------- B. TIMER ---------- */
-const timerChip = document.getElementById('timerChip');
-function fmt(ms){
-  if(ms<0) ms=0;
-  const t=Math.floor(ms/1000), m=Math.floor(t/60), s=t%60;
-  return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
-}
-function elapsed(){
-  if(!S.started||!S.startTime) return 0;
-  return (S.finished && S.endTime ? S.endTime : Date.now()) - S.startTime;
-}
-function tick(){
-  timerChip.textContent = fmt(elapsed());
-  timerChip.classList.toggle('stopped', !!S.finished);
-}
-setInterval(tick, 250);
-
-/* ---------- C. NAVIGATION ---------- */
-function show(id){
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  const el = document.getElementById(id);
-  el.classList.add('active');
-  el.scrollTop = 0;
-}
-document.querySelectorAll('[data-back]').forEach(b=>b.addEventListener('click',()=>show('view-drive')));
-document.querySelectorAll('[data-back-assemble]').forEach(b=>b.addEventListener('click',()=>show('view-assemble')));
-
-let toastT;
-function toast(msg){
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  clearTimeout(toastT); toastT = setTimeout(()=>t.classList.remove('show'), 2200);
-}
-
-/* ---------- D. COMPOSITE IMAGE + PIECES ---------- */
-/* Base composition is 300x300. Each puzzle piece is a 150x150 clipped
-   window onto that same composition, so a single piece only ever shows
-   sliced halves of the digits — unreadable and answer-free on its own. */
-const CI_HTML = `
-  <div class="ci-full">
-    <div class="ci-grid"></div>
-    <div class="ci-wm">EVIDENCE</div>
-    <div class="ci-mark tl"></div><div class="ci-mark tr"></div>
-    <div class="ci-mark bl"></div><div class="ci-mark br"></div>
-    <div class="ci-head">Sequence Analysis</div>
-    <div class="ci-dash"></div>
-    <div class="ci-circ a"></div><div class="ci-glyph g1">⌕</div>
-    <div class="ci-glyph g2">?!</div>
-    <div class="ci-tick">
-      <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
-    </div>
-    <div class="ci-band">
-      <span class="ci-num">8</span>
-      <span class="ci-num">27</span>
-      <span class="ci-num">125</span>
-      <span class="ci-num">343</span>
-      <span class="ci-num">1381</span>
-    </div>
-    <div class="ci-q">FIND THE ODD MAN OUT</div>
-    <div class="ci-note">One value breaks the pattern</div>
-    <div class="ci-circ b"></div>
-    <div class="ci-glyph g3">FRAG · A/B</div>
-    <div class="ci-glyph g4">FRAG · C/D</div>
-    <div class="ci-vign"></div>
-  </div>`;
-
-/* Build a piece element: idx 0..3 (TL,TR,BL,BR), rendered at `size` px */
-function makePiece(idx, size){
-  const k  = size/150;
-  const qx = (idx%2)*150, qy = Math.floor(idx/2)*150;
-  const wrap = document.createElement('div');
-  wrap.className = 'piece';
-  wrap.style.width = size+'px'; wrap.style.height = size+'px';
-  const inner = document.createElement('div');
-  inner.className = 'piece-inner';
-  inner.style.transform = `scale(${k}) translate(${-qx}px, ${-qy}px)`;
-  inner.innerHTML = CI_HTML;
-  wrap.appendChild(inner);
-  return wrap;
-}
-/* Full uncut image at 300px */
-function makeFullImage(){
-  const wrap = document.createElement('div');
-  wrap.className = 'piece';
-  wrap.style.width='300px'; wrap.style.height='300px';
-  const inner = document.createElement('div');
-  inner.className='piece-inner';
-  inner.innerHTML = CI_HTML;
-  wrap.appendChild(inner);
-  return wrap;
-}
-
-/* ---------- E. DRIVE UI ---------- */
-const FILES = [
-  {id:0, name:'Travel_Notes.doc',        ico:'ico-1', glyph:'📄', info:'Text document · 12 KB · Modified 2 days ago', view:'view-doc1'},
-  {id:1, name:'Sranger.doc', ico:'ico-2', glyph:'🗒️', info:'Text document · 31 KB · Modified 2 days ago', view:'view-doc2'},
-  {id:2, name:'Personal_Notes.doc',     ico:'ico-3', glyph:'🔎', info:'Text document · 58 KB · Modified 1 day ago',  view:'view-doc3'},
-  {id:3, name:'Cipher_Log.doc',        ico:'ico-4', glyph:'🔐', info:'Text document · 9 KB · Modified 6 hours ago', view:'view-doc4'}
-];
-
-function renderFiles(filter=''){
-  const wrap = document.getElementById('fileList');
-  wrap.innerHTML = '';
-  const q = filter.trim().toLowerCase();
-  const list = FILES.filter(f=>!q || f.name.toLowerCase().includes(q));
-  if(!list.length){
-    wrap.innerHTML = '<div class="ws-hint" style="padding:18px 2px">No files match “'+filter+'”.</div>';
-    return;
-  }
-  list.forEach(f=>{
-    const done = S.solved[f.id];
-    const card = document.createElement('div');
-    card.className = 'file-card' + (done?' done':'');
-    card.innerHTML = `
-      <div class="file-ico ${f.ico}">${f.glyph}</div>
-      <div class="file-meta">
-        <div class="file-name">${f.name}</div>
-        <div class="file-info">${f.info}</div>
-      </div>
-      <span class="file-tag ${done?'tag-done':'tag-open'}">${done?'✓ SOLVED':'OPEN'}</span>`;
-    card.addEventListener('click', ()=>show(f.view));
-    wrap.appendChild(card);
-  });
-}
-
-function renderPiecesBar(popIdx=-1){
-  const slots = document.getElementById('pbSlots');
-  slots.innerHTML = '';
-  for(let i=0;i<4;i++){
-    const d = document.createElement('div');
-    d.className = 'pb-slot';
-    if(S.solved[i]){
-      d.classList.add('filled');
-      if(i===popIdx) d.classList.add('pop');
-      d.appendChild(makePiece(i, 58));
-      const tag = document.createElement('div'); tag.className='idx'; tag.textContent='#'+(i+1);
-      d.appendChild(tag);
-    }else{
-      d.innerHTML = '<span class="lock">🧩</span>';
-    }
-    slots.appendChild(d);
-  }
-  const n = S.solved.filter(Boolean).length;
-  document.getElementById('pbCount').textContent = n+' / 4';
-  document.getElementById('assembleCard').style.display = (n===4) ? 'flex' : 'none';
-}
-
-document.getElementById('assembleCard').addEventListener('click', ()=>{ show('view-assemble'); buildAssembly(); });
-document.getElementById('driveSearch').addEventListener('input', e=>renderFiles(e.target.value));
-
-/* ---------- PIECE AWARD MODAL ---------- */
-function awardPiece(idx){
-  if(S.solved[idx]) return;
-  S.solved[idx] = true; save();
-  renderFiles(document.getElementById('driveSearch').value);
-  renderPiecesBar(idx);
-
-  const box = document.getElementById('modalBox');
-  box.innerHTML = `
-    <div class="big">🧩</div>
-    <h4>Puzzle Piece ${idx+1} recovered.</h4>
-    <p>Fragment stored in <b>Recovered Pieces</b>.</p>
-    <div class="preview" id="mPrev"></div>
-    <p style="margin-top:10px;font-size:11px">${S.solved.filter(Boolean).length} of 4 fragments recovered</p>
-    <div class="btn-row" style="justify-content:center">
-      <button class="btn btn-primary" id="mClose">Return to My Drive</button>
-    </div>`;
-  box.querySelector('#mPrev').appendChild(makePiece(idx, 110));
-  for(let i=0;i<16;i++){
-    const c = document.createElement('i');
-    c.className='confetti';
-    c.style.left = (Math.random()*100)+'%';
-    c.style.background = ['#1a73e8','#34a853','#f9ab00','#d93025','#a142f4'][i%5];
-    c.style.animationDelay = (Math.random()*.5)+'s';
-    box.appendChild(c);
-  }
-  document.getElementById('modalWrap').classList.add('show');
-  box.querySelector('#mClose').addEventListener('click', ()=>{
-    document.getElementById('modalWrap').classList.remove('show');
-    show('view-drive');
-  });
-}
-
-/* ==================================================================
-   F. DOCUMENT 1 — SCRAMBLED WORDS
-   ================================================================== */
-const D1 = [
-  {scr:'VELRAT', ans:['TRAVEL']},
-  {scr:'ÉCAF',   ans:['CAFE','CAFÉ']},
-  {scr:'HTAP',   ans:['PATH']},
-  {scr:'ELUB',   ans:['BLUE']}
-];
-function norm(v){
-  return (v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z]/g,'').toUpperCase();
-}
-function buildD1(){
-  const host = document.getElementById('scrRows');
-  host.innerHTML = '';
-  D1.forEach((w,i)=>{
-    const row = document.createElement('div');
-    row.className='scr-row';
-    row.innerHTML = `<div class="scr-word">${w.scr}</div>
-                     <div class="scr-arrow">→</div>
-                     <input id="d1i${i}" maxlength="10" placeholder="answer" autocomplete="off" spellcheck="false"/>`;
-    host.appendChild(row);
-  });
-  if(S.solved[0]) lockD1();
-}
-function lockD1(){
-  D1.forEach((w,i)=>{
-    const el = document.getElementById('d1i'+i);
-    el.value = w.ans[0]; el.disabled = true; el.classList.add('good');
-  });
-  document.getElementById('d1Check').disabled = true;
-  document.getElementById('d1Clear').disabled = true;
-  const m = document.getElementById('d1Msg'); m.className='feedback ok';
-  m.textContent = '✓ Document 1 already completed — Puzzle Piece 1 recovered.';
-}
-document.getElementById('d1Check').addEventListener('click', ()=>{
-  let all = true;
-  D1.forEach((w,i)=>{
-    const el = document.getElementById('d1i'+i);
-    const ok = w.ans.map(norm).includes(norm(el.value));
-    el.classList.toggle('good', ok);
-    el.classList.toggle('wrong', !ok && el.value.trim()!=='');
-    if(!ok) all = false;
-  });
-  const m = document.getElementById('d1Msg');
-  if(all){
-    m.className='feedback ok'; m.textContent='All four words restored. Fragment unlocked…';
-    document.getElementById('d1Check').disabled = true;
-    document.getElementById('d1Clear').disabled = true;
-    D1.forEach((w,i)=>document.getElementById('d1i'+i).disabled = true);
-    setTimeout(()=>awardPiece(0), 650);
-  }else{
-    m.className='feedback bad'; m.textContent='Some words are still scrambled. Check the red fields.';
-    document.querySelector('#view-doc1 .paper').classList.add('shake');
-    setTimeout(()=>document.querySelector('#view-doc1 .paper').classList.remove('shake'),420);
-  }
-});
-document.getElementById('d1Clear').addEventListener('click', ()=>{
-  D1.forEach((w,i)=>{
-    const el=document.getElementById('d1i'+i);
-    el.value=''; el.classList.remove('good','wrong');
-  });
-  document.getElementById('d1Msg').textContent='';
-});
-
-/* ==================================================================
-   G. DOCUMENT 2 — HANGMAN
-   ================================================================== */
-const HM_WORD = 'STATION';
-const HM_MAX  = 6;
-let hmGuessed = new Set(), hmWrong = 0;
-
-const HM_PARTS = [
-  '<circle cx="74" cy="46" r="11" fill="none" stroke="#d93025" stroke-width="3"/>',
-  '<line x1="74" y1="57" x2="74" y2="88" stroke="#d93025" stroke-width="3"/>',
-  '<line x1="74" y1="64" x2="60" y2="78" stroke="#d93025" stroke-width="3"/>',
-  '<line x1="74" y1="64" x2="88" y2="78" stroke="#d93025" stroke-width="3"/>',
-  '<line x1="74" y1="88" x2="61" y2="106" stroke="#d93025" stroke-width="3"/>',
-  '<line x1="74" y1="88" x2="87" y2="106" stroke="#d93025" stroke-width="3"/>'
-];
-const HM_GALLOWS = `
-  <line x1="12" y1="120" x2="60" y2="120" stroke="#5f6368" stroke-width="4"/>
-  <line x1="30" y1="120" x2="30" y2="16"  stroke="#5f6368" stroke-width="4"/>
-  <line x1="30" y1="16"  x2="74" y2="16"  stroke="#5f6368" stroke-width="4"/>
-  <line x1="74" y1="16"  x2="74" y2="35"  stroke="#5f6368" stroke-width="3"/>`;
-
-function buildD2(){
-  const kbd = document.getElementById('hmKbd');
-  kbd.innerHTML='';
-  'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(L=>{
-    const b=document.createElement('button');
-    b.className='key'; b.textContent=L; b.dataset.k=L;
-    b.addEventListener('click',()=>hmGuess(L));
-    kbd.appendChild(b);
-  });
-  if(S.solved[1]){ hmGuessed = new Set(HM_WORD.split('')); hmWrong = 0; }
-  hmRender();
-  if(S.solved[1]){
-    document.querySelectorAll('#hmKbd .key').forEach(b=>b.disabled=true);
-    const m=document.getElementById('d2Msg'); m.className='feedback ok';
-    m.textContent='✓ Document 2 already completed — Puzzle Piece 2 recovered.';
-  }
-}
-function hmRender(){
-  const blanks = document.getElementById('hmBlanks');
-  blanks.innerHTML='';
-  HM_WORD.split('').forEach(ch=>{
-    const d=document.createElement('div');
-    const rev = hmGuessed.has(ch);
-    d.className='hm-slot'+(rev?' rev':'');
-    d.textContent = rev?ch:'';
-    blanks.appendChild(d);
-  });
-  document.getElementById('hmHearts').innerHTML =
-    '❤️'.repeat(HM_MAX-hmWrong) + '<span style="opacity:.25">🖤'.repeat(hmWrong) + '</span>';
-  const wrongs=[...hmGuessed].filter(c=>!HM_WORD.includes(c));
-  document.getElementById('hmWrong').textContent = wrongs.length? wrongs.join(' ') : '—';
-  document.getElementById('hmSvg').innerHTML = HM_GALLOWS + HM_PARTS.slice(0,hmWrong).join('');
-}
-function hmGuess(L){
-  if(S.solved[1] || hmGuessed.has(L)) return;
-  hmGuessed.add(L);
-  const btn = document.querySelector(`#hmKbd .key[data-k="${L}"]`);
-  const hit = HM_WORD.includes(L);
-  btn.disabled = true; btn.classList.add(hit?'hit':'miss');
-  if(!hit) hmWrong++;
-  hmRender();
-
-  const msg = document.getElementById('d2Msg');
-  if(HM_WORD.split('').every(c=>hmGuessed.has(c))){
-    msg.className='feedback ok'; msg.textContent='Keyword restored: '+HM_WORD+'. Fragment unlocked…';
-    document.querySelectorAll('#hmKbd .key').forEach(b=>b.disabled=true);
-    setTimeout(()=>awardPiece(1), 700);
-  } else if(hmWrong>=HM_MAX){
-    msg.className='feedback bad'; msg.textContent='Transcript corrupted. Reloading the document…';
-    document.querySelectorAll('#hmKbd .key').forEach(b=>b.disabled=true);
-    setTimeout(()=>{
-      hmGuessed=new Set(); hmWrong=0;
-      document.querySelectorAll('#hmKbd .key').forEach(b=>{b.disabled=false;b.classList.remove('hit','miss')});
-      msg.textContent=''; hmRender();
-    }, 1600);
-  } else {
-    msg.className='feedback'; msg.textContent='';
-  }
-}
-
-/* ==================================================================
-   H. DOCUMENT 3 — WORD SEARCH (10x10)
-   ================================================================== */
-const WS_N = 10;
-const WS_WORDS = [
-  {w:'EVIDENCE', hint:'Proof collected at a scene'},
-  {w:'SEARCH',   hint:'The act of looking thoroughly'},
-  {w:'HIDDEN',   hint:'Kept out of sight'},
-  {w:'TRACE',    hint:'A faint mark left behind'},
-  {w:'CLUE',     hint:'A hint that guides an inquiry'}
-];
-/* Fixed placements: [row, col, dRow, dCol] */
-const WS_PLACE = {
-  EVIDENCE:[0,1, 0, 1],   // horizontal →
-  SEARCH  :[2,0, 1, 0],   // vertical ↓
-  HIDDEN  :[3,3, 1, 1],   // diagonal ↘
-  TRACE   :[9,7, 0,-1],   // horizontal ← (backwards)
-  CLUE    :[6,9,-1, 0]    // vertical ↑ (backwards)
-};
-let wsGrid=[], wsFound=new Set(), wsStart=null;
-
-function buildWsGrid(){
-  const g = Array.from({length:WS_N},()=>Array(WS_N).fill(null));
-  Object.entries(WS_PLACE).forEach(([w,[r,c,dr,dc]])=>{
-    for(let i=0;i<w.length;i++) g[r+dr*i][c+dc*i] = w[i];
-  });
-  const A='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  for(let r=0;r<WS_N;r++) for(let c=0;c<WS_N;c++)
-    if(!g[r][c]) g[r][c]=A[Math.floor(Math.random()*26)];
-  return g;
-}
-function buildD3(){
-  wsGrid = buildWsGrid();
-  wsFound = new Set(); wsStart = null;
-  const host = document.getElementById('wsGrid');
-  host.innerHTML='';
-  for(let r=0;r<WS_N;r++) for(let c=0;c<WS_N;c++){
-    const d=document.createElement('div');
-    d.className='ws-cell'; d.textContent=wsGrid[r][c];
-    d.dataset.r=r; d.dataset.c=c;
-    d.addEventListener('click',()=>wsClick(r,c));
-    host.appendChild(d);
-  }
-  if(S.solved[2]){
-    WS_WORDS.forEach(o=>{ wsFound.add(o.w); wsPaint(o.w); });
-    const m=document.getElementById('d3Msg'); m.className='feedback ok';
-    m.textContent='✓ Document 3 already completed — Puzzle Piece 3 recovered.';
-  }
-  renderWsWords();
-}
-function renderWsWords(){
-  const host=document.getElementById('wsWords'); host.innerHTML='';
-  WS_WORDS.forEach(o=>{
-    const d=document.createElement('div');
-    d.className='ws-word'+(wsFound.has(o.w)?' found':'');
-    d.innerHTML = (wsFound.has(o.w)? o.w : o.w.replace(/./g,'•')) + '<span>'+o.hint+'</span>';
-    host.appendChild(d);
-  });
-}
-function cellAt(r,c){ return document.querySelector(`#wsGrid .ws-cell[data-r="${r}"][data-c="${c}"]`); }
-function wsPaint(word){
-  const [r,c,dr,dc] = WS_PLACE[word];
-  for(let i=0;i<word.length;i++){
-    const el = cellAt(r+dr*i, c+dc*i);
-    if(el){ el.classList.add('found'); el.classList.remove('start'); }
-  }
-}
-function wsClick(r,c){
-  if(S.solved[2]) return;
-  const msg = document.getElementById('d3Msg');
-  if(!wsStart){
-    wsStart = {r,c};
-    cellAt(r,c).classList.add('start');
-    msg.className='feedback'; msg.textContent='';
-    return;
-  }
-  const s = wsStart;
-  cellAt(s.r,s.c).classList.remove('start');
-  wsStart = null;
-  if(s.r===r && s.c===c) return;                       // tapped same cell → cancel
-
-  const dr = r-s.r, dc = c-s.c;
-  const straight = (dr===0 || dc===0 || Math.abs(dr)===Math.abs(dc));
-  if(!straight){
-    msg.className='feedback bad';
-    msg.textContent='Selection must be a straight line (row, column or diagonal).';
-    return;
-  }
-  const steps = Math.max(Math.abs(dr),Math.abs(dc));
-  const ur = dr===0?0:dr/steps, uc = dc===0?0:dc/steps;
-  let str='', path=[];
-  for(let i=0;i<=steps;i++){
-    const rr=s.r+ur*i, cc=s.c+uc*i;
-    str += wsGrid[rr][cc]; path.push([rr,cc]);
-  }
-  const rev = str.split('').reverse().join('');
-  const hit = WS_WORDS.map(o=>o.w).find(w=>(w===str||w===rev) && !wsFound.has(w));
-
-  if(hit){
-    wsFound.add(hit);
-    path.forEach(([rr,cc])=>cellAt(rr,cc).classList.add('found'));
-    renderWsWords();
-    msg.className='feedback ok';
-    msg.textContent = `Found “${hit}”  ·  ${wsFound.size}/${WS_WORDS.length}`;
-    if(wsFound.size===WS_WORDS.length){
-      msg.textContent='All terms located. Fragment unlocked…';
-      setTimeout(()=>awardPiece(2), 700);
-    }
-  }else{
-    path.forEach(([rr,cc])=>{
-      const el=cellAt(rr,cc);
-      if(!el.classList.contains('found')){
-        el.classList.add('err'); setTimeout(()=>el.classList.remove('err'),340);
-      }
-    });
-    msg.className='feedback bad'; msg.textContent='No match on that line.';
-  }
-}
-document.getElementById('d3Reset').addEventListener('click', ()=>{
-  if(wsStart){ cellAt(wsStart.r,wsStart.c).classList.remove('start'); wsStart=null; }
-  document.getElementById('d3Msg').textContent='';
-});
-
-/* ==================================================================
-   I. DOCUMENT 4 — MINI SUDOKU 4x4
-   ================================================================== */
-/* givens (0 = empty) — unique solution */
-const SK_GIVENS = [
-  1,0,3,0,
-  0,4,0,2,
-  2,0,0,0,
-  0,0,0,1
-];
-function buildD4(){
-  const host=document.getElementById('skGrid'); host.innerHTML='';
-  for(let i=0;i<16;i++){
-    const cell=document.createElement('div');
-    cell.className='sk-cell';
-    const g=SK_GIVENS[i];
-    if(g){
-      cell.classList.add('given');
-      cell.innerHTML=`<span>${g}</span>`;
-    }else{
-      const inp=document.createElement('input');
-      inp.type='text'; inp.inputMode='numeric'; inp.maxLength=1; inp.dataset.i=i;
-      inp.addEventListener('input',e=>{
-        const v=e.target.value.replace(/[^1-4]/g,'');
-        e.target.value=v.slice(-1);
-        cell.classList.remove('bad');
-        if(v) focusNext(i);
-      });
-      inp.addEventListener('keydown',e=>{
-        if(e.key==='Backspace' && !e.target.value) focusPrev(i);
-      });
-      cell.appendChild(inp);
-    }
-    host.appendChild(cell);
-  }
-  if(S.solved[3]) lockD4();
-}
-function inputs(){ return [...document.querySelectorAll('#skGrid input')]; }
-function focusNext(i){ const n=inputs().find(x=>+x.dataset.i>i); if(n) n.focus(); }
-function focusPrev(i){ const p=[...inputs()].reverse().find(x=>+x.dataset.i<i); if(p) p.focus(); }
-
-function readSk(){
-  const v = SK_GIVENS.slice();
-  inputs().forEach(inp=>{ v[+inp.dataset.i] = inp.value? +inp.value : 0; });
-  return v;
-}
-function validSk(v){
-  if(v.some(x=>!x)) return {ok:false, reason:'empty'};
-  const set = a => new Set(a).size===4 && a.every(n=>n>=1&&n<=4);
-  for(let r=0;r<4;r++) if(!set(v.slice(r*4,r*4+4))) return {ok:false, reason:'row '+(r+1)};
-  for(let c=0;c<4;c++) if(!set([v[c],v[c+4],v[c+8],v[c+12]])) return {ok:false, reason:'column '+(c+1)};
-  const boxes=[[0,1,4,5],[2,3,6,7],[8,9,12,13],[10,11,14,15]];
-  for(let b=0;b<4;b++) if(!set(boxes[b].map(i=>v[i]))) return {ok:false, reason:'block '+(b+1)};
-  return {ok:true};
-}
-function lockD4(){
-  const sol=[1,2,3,4, 3,4,1,2, 2,1,4,3, 4,3,2,1];
-  inputs().forEach(inp=>{ inp.value = sol[+inp.dataset.i]; inp.disabled = true; });
-  document.querySelectorAll('#skGrid .sk-cell').forEach(c=>c.classList.add('solved'));
-  document.getElementById('d4Check').disabled=true;
-  document.getElementById('d4Clear').disabled=true;
-  const m=document.getElementById('d4Msg'); m.className='feedback ok';
-  m.textContent='✓ Document 4 already completed — Puzzle Piece 4 recovered.';
-}
-document.getElementById('d4Check').addEventListener('click', ()=>{
-  const v=readSk(), res=validSk(v), m=document.getElementById('d4Msg');
-  if(res.ok){
-    m.className='feedback ok'; m.textContent='Matrix verified. Final fragment unlocked…';
-    inputs().forEach(i=>i.disabled=true);
-    document.querySelectorAll('#skGrid .sk-cell').forEach(c=>c.classList.add('solved'));
-    document.getElementById('d4Check').disabled=true;
-    document.getElementById('d4Clear').disabled=true;
-    setTimeout(()=>awardPiece(3), 700);
-  }else if(res.reason==='empty'){
-    m.className='feedback bad'; m.textContent='Matrix incomplete — every cell needs a value from 1 to 4.';
-    inputs().filter(i=>!i.value).forEach(i=>{
-      i.parentElement.classList.add('bad');
-      setTimeout(()=>i.parentElement.classList.remove('bad'),600);
-    });
-  }else{
-    m.className='feedback bad'; m.textContent='Conflict detected in '+res.reason+'. Re-check your values.';
-    document.getElementById('skGrid').classList.add('shake');
-    setTimeout(()=>document.getElementById('skGrid').classList.remove('shake'),420);
-  }
-});
-document.getElementById('d4Clear').addEventListener('click', ()=>{
-  inputs().forEach(i=>{ i.value=''; i.parentElement.classList.remove('bad'); });
-  document.getElementById('d4Msg').textContent='';
-});
-
-/* ==================================================================
-   J. ASSEMBLY · FINAL QUESTION · COMPLETION
-   ================================================================== */
-const SCATTER = [
-  {x:-58,y:-46,r:-13},{x: 62,y:-54,r: 11},
-  {x:-66,y: 52,r:  9},{x: 54,y: 62,r:-10}
-];
-function buildAssembly(){
-  const stage=document.getElementById('asmStage');
-  stage.classList.remove('done');
-  stage.querySelectorAll('.slot').forEach(s=>s.remove());
-  for(let i=0;i<4;i++){
-    const slot=document.createElement('div');
-    slot.className='slot';
-    slot.style.left = ((i%2)*150)+'px';
-    slot.style.top  = (Math.floor(i/2)*150)+'px';
-    slot.style.transform = `translate(${SCATTER[i].x}px, ${SCATTER[i].y}px) rotate(${SCATTER[i].r}deg)`;
-    slot.style.transitionDelay = (i*0.12)+'s';
-    slot.appendChild(makePiece(i,150));
-    stage.appendChild(slot);
-  }
-  document.getElementById('btnAssemble').style.display = S.assembled? 'none':'inline-block';
-  document.getElementById('btnToFinal').style.display  = S.assembled? 'inline-block':'none';
-  document.getElementById('asmTitle').textContent = S.assembled? 'Image reconstructed' : 'Four fragments recovered';
-  document.getElementById('asmSub').textContent   = S.assembled
-      ? 'Photo is complete.'
-      : 'Align the fragments to rebuild the original evidence photo.';
-  if(S.assembled) stage.classList.add('done');
-}
-document.getElementById('btnAssemble').addEventListener('click', ()=>{
-  const stage=document.getElementById('asmStage');
-  stage.classList.add('done');
-  document.getElementById('btnAssemble').style.display='none';
-  S.assembled = true; save();
-  setTimeout(()=>{
-    document.getElementById('asmTitle').textContent='Image reconstructed';
-    document.getElementById('asmSub').textContent='The composite evidence photo is complete.';
-    document.getElementById('btnToFinal').style.display='inline-block';
-    toast('Fragments aligned — clue visible');
-  }, 1450);
-});
-document.getElementById('btnToFinal').addEventListener('click', ()=>{
-  const holder=document.getElementById('finalImage');
-  holder.innerHTML=''; holder.appendChild(makeFullImage());
-  show('view-final');
-  setTimeout(()=>document.getElementById('finalInput').focus(), 380);
-});
-
-/* --- Final answer --- */
-const FINAL_ANSWER = '1381';
-function checkFinal(){
-  const raw = document.getElementById('finalInput').value;
-  const clean = (raw||'').replace(/[^0-9]/g,'');
-  const msg = document.getElementById('finalMsg');
-  if(!clean){
-    msg.className='msg bad'; msg.textContent='Enter an answer first.'; return;
-  }
-  if(clean === FINAL_ANSWER){
-    msg.className='msg ok'; msg.textContent='Correct. Sequence broken.';
-    S.finished = true; S.endTime = Date.now(); save();
-    tick();
-    setTimeout(()=>{
-      document.getElementById('finalTime').textContent = fmt(S.endTime - S.startTime);
-      show('view-complete');
-    }, 900);
-  }else{
-    msg.className='msg bad'; msg.textContent='Incorrect answer. Examine the image again.';
-    const box = document.querySelector('.final-image-holder');
-    box.classList.add('shake'); setTimeout(()=>box.classList.remove('shake'),420);
-    document.getElementById('finalInput').select();
-  }
-}
-document.getElementById('btnSubmitFinal').addEventListener('click', checkFinal);
-document.getElementById('finalInput').addEventListener('keydown', e=>{ if(e.key==='Enter') checkFinal(); });
-
-/* ---------- START / RESET ---------- */
-document.getElementById('btnStart').addEventListener('click', ()=>{
-  if(!S.started){ S.started=true; S.startTime=Date.now(); save(); }
-  show('view-drive');
-  toast('Timer started — Drive access granted');
-});
-document.getElementById('btnResetStart').addEventListener('click', resetAll);
-document.getElementById('btnPlayAgain').addEventListener('click', resetAll);
-
-/* ---------- BOOT ---------- */
-(function init(){
-  load();
-  buildD1(); buildD2(); buildD3(); buildD4();
-  renderFiles(); renderPiecesBar();
-  tick();
-
-  if(S.finished){
-    document.getElementById('finalTime').textContent = fmt((S.endTime||0)-(S.startTime||0));
-    show('view-complete');
-  }else if(S.started){
-    show('view-drive');
-    setTimeout(()=>toast('Session resumed — timer still running'), 500);
-  }else{
-    show('view-start');
-  }
-})();
-</script>
+  <script src="game.js"></script>
+  <script src="puzzles.js"></script>
 </body>
 </html>
