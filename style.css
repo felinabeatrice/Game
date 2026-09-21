@@ -129,6 +129,7 @@ body::before{
 .gd-avatar{
   width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#d93025,#f9ab00);
   color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700;flex:0 0 auto;
+  text-transform:uppercase;
 }
 
 .gd-chips{display:flex;gap:8px;padding:11px 14px 4px;flex-wrap:wrap}
@@ -487,6 +488,84 @@ body::before{
   opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;max-width:88%;
 }
 #toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* ============================================================
+   11. LEADERBOARD + PLAYER NAME (new feature)
+   ============================================================ */
+.player-input-wrap{
+  margin:18px auto 0;width:100%;max-width:290px;text-align:left;
+}
+.player-input-wrap label{
+  display:block;font-size:10.5px;letter-spacing:2px;color:#7fd8ff;
+  text-transform:uppercase;margin-bottom:7px;
+}
+.player-input-wrap input#playerName{
+  width:100%;padding:12px 15px;border-radius:10px;
+  border:1px solid #2b3c55;background:#0d1522;color:#e9f2ff;
+  font-size:14px;letter-spacing:.5px;outline:none;
+  transition:border-color .2s, box-shadow .2s;
+  font-family:inherit;
+}
+.player-input-wrap input#playerName::placeholder{color:#5a6b84}
+.player-input-wrap input#playerName:focus{
+  border-color:#4c9aff;box-shadow:0 0 0 3px rgba(76,154,255,.18);
+}
+.input-error{
+  color:#ff7b72;font-size:11px;font-weight:600;
+  margin-top:5px;min-height:15px;
+}
+.player-input-wrap + .btn-row .btn-start{margin-top:8px}
+#view-start .btn-row{width:100%;justify-content:center}
+#view-start #btnOpenLeaderboard{
+  background:transparent;color:#cfe0f5;border:1px solid #2b3c55;
+  padding:10px 20px;align-self:center;width:auto;
+}
+#view-start #btnOpenLeaderboard:hover{
+  background:#18243a;border-color:#4c9aff;color:#fff;
+}
+
+.lb-container{
+  background:rgba(13,21,34,.65);border:1px solid #1e2c40;
+  border-radius:12px;margin-top:15px;overflow:hidden;
+  width:100%;max-width:300px;margin-left:auto;margin-right:auto;
+}
+.lb-header, .lb-row{
+  display:grid;grid-template-columns:36px 1fr 78px;
+  padding:10px 14px;font-size:13px;text-align:left;align-items:center;
+}
+.lb-header{
+  background:rgba(30,44,64,.85);font-weight:700;
+  text-transform:uppercase;font-size:10.5px;letter-spacing:1.4px;color:#7fd8ff;
+}
+.lb-list{max-height:280px;overflow-y:auto}
+.lb-list::-webkit-scrollbar{width:5px}
+.lb-list::-webkit-scrollbar-thumb{background:#2b3c55;border-radius:4px}
+.lb-row{
+  border-bottom:1px solid rgba(30,44,64,.45);color:#cfe0f5;
+}
+.lb-row:last-child{border-bottom:0}
+.lb-row span:first-child{
+  font-family:"Roboto Mono",monospace;font-weight:700;color:#8ea3bf;
+}
+.lb-row span:last-child{
+  font-family:"Roboto Mono",monospace;text-align:right;color:#e9f2ff;
+}
+.lb-list .lb-row:nth-child(1) span:first-child{color:#ffd66b}
+.lb-list .lb-row:nth-child(2) span:first-child{color:#c0c9d6}
+.lb-list .lb-row:nth-child(3) span:first-child{color:#e09b6a}
+.lb-row.highlight{
+  background:rgba(255,214,107,.14);color:#ffd66b;font-weight:700;
+  border-left:3px solid #ffd66b;
+}
+.lb-row.highlight span:first-child,
+.lb-row.highlight span:last-child{color:#ffd66b}
+.lb-status{padding:20px;font-size:12px;color:#6e829c;line-height:1.6}
+.complete-lb-section{margin:22px auto 0;width:100%;max-width:300px}
+.complete-lb-section .lb-title,
+.lb-title{
+  font-size:11px;letter-spacing:2.2px;text-transform:uppercase;
+  color:#7fd8ff;text-align:center;margin-bottom:10px;
+}
 
 /* ============================================================
    10. RESPONSIVE
