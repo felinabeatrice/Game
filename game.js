@@ -296,7 +296,7 @@ const FILES = [
   },
   {
     id: 1,
-    name: 'Sranger.doc',
+    name: 'Stranger.doc',
     ico: 'ico-2',
     glyph: '🗒️',
     info: 'Text document · 31 KB · Modified 2 days ago',
