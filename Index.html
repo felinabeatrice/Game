@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Case 0447 — Drive Investigation</title>
   <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
 
   <div class="page-head">
@@ -13,11 +15,14 @@
   </div>
 
   <div class="phone-wrap">
+
     <div class="phone">
+
       <div class="phone-screen">
+
         <div class="notch"></div>
 
-        <!-- STATUS BAR (timer always visible) -->
+        <!-- STATUS BAR -->
         <div class="status-bar">
           <span>9:41</span>
           <span class="timer-chip" id="timerChip">00:00</span>
@@ -26,257 +31,987 @@
 
         <div class="views">
 
-          <!-- ============ START ============ -->
+          <!-- =====================================================
+               START
+               ===================================================== -->
+
           <section id="view-start" class="view active">
+
             <div class="start-phone-ico">📱</div>
+
             <h2>Device Recovered</h2>
-            <p class="lead">A phone has been found. Investigate the Google Drive files to uncover the truth.</p>
+
+            <p class="lead">
+              A phone has been found. Investigate the Google Drive
+              files to uncover the truth.
+            </p>
+
             <div class="start-list">
+
               <div>▸ <b>4 documents</b> remain on the account</div>
+
               <div>▸ Each document hides <b>one puzzle piece</b></div>
+
               <div>▸ Assemble all pieces to reveal the final clue</div>
+
               <div>▸ Your <b>time is being recorded</b></div>
+
             </div>
-            <button class="btn-start" id="btnStart">Start Game</button>
-            <button class="link-reset" id="btnResetStart">Clear saved progress</button>
+
+            <!-- PLAYER NAME -->
+
+            <div class="name-box">
+
+              <label for="playerName">
+                Investigator Name
+              </label>
+
+              <input
+                id="playerName"
+                type="text"
+                placeholder="Enter your name"
+                autocomplete="off"
+                maxlength="30"
+              />
+
+              <div
+                id="nameError"
+                class="name-error">
+              </div>
+
+            </div>
+
+            <!-- START BUTTON -->
+
+            <button
+              class="btn-start"
+              id="btnStart">
+              Start Game
+            </button>
+
+            <!-- LEADERBOARD BUTTON -->
+
+            <button
+              class="btn btn-ghost"
+              id="btnOpenLeaderboard"
+              style="width:100%;margin-top:10px;">
+              🏆 Leaderboard
+            </button>
+
+            <button
+              class="link-reset"
+              id="btnResetStart">
+              Clear saved progress
+            </button>
+
           </section>
 
-          <!-- ============ MY DRIVE ============ -->
+
+          <!-- =====================================================
+               MY DRIVE
+               ===================================================== -->
+
           <section id="view-drive" class="view">
+
             <div class="gd-header">
+
               <div class="gd-hamb">☰</div>
+
               <div class="gd-search">
-                <span style="font-size:13px;color:#5f6368">🔍</span>
-                <input id="driveSearch" placeholder="Search in Drive" autocomplete="off"/>
+
+                <span style="font-size:13px;color:#5f6368">
+                  🔍
+                </span>
+
+                <input
+                  id="driveSearch"
+                  placeholder="Search in Drive"
+                  autocomplete="off" />
+
               </div>
-              <div class="gd-avatar">K</div>
+
+              <div
+                class="gd-avatar"
+                id="userAvatar">
+                K
+              </div>
+
             </div>
 
+
             <div class="gd-chips">
+
               <span class="chip active">Files</span>
               <span class="chip">Type</span>
               <span class="chip">People</span>
               <span class="chip">Modified</span>
+
             </div>
+
 
             <div class="gd-body">
-              <div class="gd-crumb">📁 My Drive</div>
-              <div class="gd-sub">Owner: device account · 4 items · Synced 2 days ago</div>
-              <div class="file-list" id="fileList"><!-- injected --></div>
-              <div class="assemble-card" id="assembleCard" style="display:none">
-                <div class="file-ico" style="background:linear-gradient(145deg,#1a73e8,#7627bb)">🧩</div>
+
+              <div class="gd-crumb">
+                📁 My Drive
+              </div>
+
+              <div class="gd-sub">
+                Owner: device account · 4 items · Synced 2 days ago
+              </div>
+
+              <div
+                class="file-list"
+                id="fileList">
+                <!-- injected by game.js -->
+              </div>
+
+
+              <div
+                class="assemble-card"
+                id="assembleCard"
+                style="display:none">
+
+                <div
+                  class="file-ico"
+                  style="background:linear-gradient(145deg,#1a73e8,#7627bb)">
+                  🧩
+                </div>
+
                 <div class="file-meta">
+
                   <h4>Assemble Puzzle</h4>
-                  <p>All 4 fragments recovered — reconstruct the image</p>
+
+                  <p>
+                    All 4 fragments recovered —
+                    reconstruct the image
+                  </p>
+
                 </div>
-                <span class="file-tag tag-open">READY</span>
+
+                <span class="file-tag tag-open">
+                  READY
+                </span>
+
               </div>
+
             </div>
 
-            <!-- Recovered pieces footer -->
+
+            <!-- RECOVERED PIECES -->
+
             <div class="pieces-bar">
+
               <div class="pb-top">
-                <div class="pb-title">Recovered Pieces</div>
-                <div class="pb-count" id="pbCount">0 / 4</div>
-              </div>
-              <div class="pb-slots" id="pbSlots"></div>
-            </div>
-          </section>
 
-          <!-- ============ DOC 1 ============ -->
-          <section id="view-doc1" class="view">
-            <div class="doc-top">
-              <button class="btn-back" data-back>←</button>
-              <div class="doc-title">Travel_Notes.doc</div>
-              <span class="doc-diff d1">LEVEL 1</span>
-            </div>
-            <div class="doc-body">
-              <div class="paper">
-                <h3>Entry 14</h3>
-                <p class="muted">Last edited 2 days ago</p>
-                <div class="rule"></div>
-                <p><b>"I don't know why, but lately I've been feeling like someone is following me. Yesterday, I decided to leave for a while and take the old route I used to visit when I needed some time alone.
-                       I remember the velrat was longer than usual. I followed the same htap I had taken many times before. The sky was completely elub, and before heading further, I stopped at my usual ecaf.
-                       Something felt different that day. I had a feeling I shouldn't stay there for too long.”</b></p>
-                <p>Some words in the message seem to be damaged.
-                  Restore the corrupted words to recover the missing information.
-                </p>
-                <div class="rule"></div>
-                <div id="scrRows"></div>
-                <div class="btn-row">
-                  <button class="btn btn-primary" id="d1Check">Check Answers</button>
-                  <button class="btn btn-ghost" id="d1Clear">Clear</button>
+                <div class="pb-title">
+                  Recovered Pieces
                 </div>
-                <div class="feedback" id="d1Msg"></div>
+
+                <div
+                  class="pb-count"
+                  id="pbCount">
+                  0 / 4
+                </div>
+
               </div>
+
+              <div
+                class="pb-slots"
+                id="pbSlots">
+              </div>
+
             </div>
+
           </section>
 
-          <!-- ============ DOC 2 ============ -->
-          <section id="view-doc2" class="view">
-            <div class="doc-top">
-              <button class="btn-back" data-back>←</button>
-              <div class="doc-title">Stranger.doc</div>
-              <span class="doc-diff d2">LEVEL 2</span>
-            </div>
-            <div class="doc-body">
-              <div class="paper">
-                <h3>Stranger</h3>
-                <p class="muted">Audio damaged — one keyword unreadable</p>
-                <div class="rule"></div>
-                <div class="clue-box">“I thought being surrounded by people would make me feel safer, but the feeling of being watched never left.
-    I noticed the same person near the entrance. I moved to another platform, and somehow they appeared there too. My train was about to arrive. I was supposed to leave on the next _ _ _ _ _ _ _, but I suddenly noticed the person standing at the end of the platform.
-    They weren't looking at me. They were looking at the notebook in my hand. I decided not to board the train. Before leaving, I quickly wrote down the numbers I had been studying. I still haven't figured out why one of them doesn't fit..”<br>
-                  <b>Clue:</b> A place where people wait for transport.</div>
 
-                <div class="hm-blanks" id="hmBlanks"></div>
+          <!-- =====================================================
+               DOC 1
+               ===================================================== -->
+
+          <section id="view-doc1" class="view">
+
+            <div class="doc-top">
+
+              <button
+                class="btn-back"
+                data-back>
+                ←
+              </button>
+
+              <div class="doc-title">
+                Travel_Notes.doc
+              </div>
+
+              <span class="doc-diff d1">
+                LEVEL 1
+              </span>
+
+            </div>
+
+
+            <div class="doc-body">
+
+              <div class="paper">
+
+                <h3>Entry 14</h3>
+
+                <p class="muted">
+                  Last edited 2 days ago
+                </p>
+
+                <div class="rule"></div>
+
+                <p>
+                  <b>
+                    "I don't know why, but lately I've been feeling
+                    like someone is following me. Yesterday, I decided
+                    to leave for a while and take the old route I used
+                    to visit when I needed some time alone.
+
+                    I remember the velrat was longer than usual.
+                    I followed the same htap I had taken many times
+                    before. The sky was completely elub, and before
+                    heading further, I stopped at my usual ecaf.
+
+                    Something felt different that day. I had a feeling
+                    I shouldn't stay there for too long."
+                  </b>
+                </p>
+
+                <p>
+                  Some words in the message seem to be damaged.
+                  Restore the corrupted words to recover the missing
+                  information.
+                </p>
+
+                <div class="rule"></div>
+
+                <div id="scrRows"></div>
+
+                <div class="btn-row">
+
+                  <button
+                    class="btn btn-primary"
+                    id="d1Check">
+                    Check Answers
+                  </button>
+
+                  <button
+                    class="btn btn-ghost"
+                    id="d1Clear">
+                    Clear
+                  </button>
+
+                </div>
+
+                <div
+                  class="feedback"
+                  id="d1Msg">
+                </div>
+
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <!-- =====================================================
+               DOC 2
+               ===================================================== -->
+
+          <section id="view-doc2" class="view">
+
+            <div class="doc-top">
+
+              <button
+                class="btn-back"
+                data-back>
+                ←
+              </button>
+
+              <div class="doc-title">
+                Stranger.doc
+              </div>
+
+              <span class="doc-diff d2">
+                LEVEL 2
+              </span>
+
+            </div>
+
+
+            <div class="doc-body">
+
+              <div class="paper">
+
+                <h3>Stranger</h3>
+
+                <p class="muted">
+                  Audio damaged — one keyword unreadable
+                </p>
+
+                <div class="rule"></div>
+
+                <div class="clue-box">
+
+                  “I thought being surrounded by people would make
+                  me feel safer, but the feeling of being watched
+                  never left.
+
+                  I noticed the same person near the entrance.
+                  I moved to another platform, and somehow they
+                  appeared there too. My train was about to arrive.
+                  I was supposed to leave on the next _ _ _ _ _ _ _,
+                  but I suddenly noticed the person standing at the
+                  end of the platform.
+
+                  They weren't looking at me. They were looking at
+                  the notebook in my hand. I decided not to board
+                  the train. Before leaving, I quickly wrote down
+                  the numbers I had been studying. I still haven't
+                  figured out why one of them doesn't fit.”
+
+                  <br><br>
+
+                  <b>Clue:</b>
+                  A place where people wait for transport.
+
+                </div>
+
+
+                <div
+                  class="hm-blanks"
+                  id="hmBlanks">
+                </div>
+
 
                 <div class="hm-wrap">
-                  <svg class="hm-svg" id="hmSvg" width="112" height="128" viewBox="0 0 112 128"></svg>
+
+                  <svg
+                    class="hm-svg"
+                    id="hmSvg"
+                    width="112"
+                    height="128"
+                    viewBox="0 0 112 128">
+                  </svg>
+
+
                   <div class="hm-side">
-                    <div class="hm-lives">Attempts remaining</div>
-                    <div class="hm-hearts" id="hmHearts"></div>
+
+                    <div class="hm-lives">
+                      Attempts remaining
+                    </div>
+
+                    <div
+                      class="hm-hearts"
+                      id="hmHearts">
+                    </div>
+
                     <div style="height:8px"></div>
-                    <div class="hm-lives">Wrong letters</div>
-                    <div class="hm-wrong" id="hmWrong">—</div>
+
+                    <div class="hm-lives">
+                      Wrong letters
+                    </div>
+
+                    <div
+                      class="hm-wrong"
+                      id="hmWrong">
+                      —
+                    </div>
+
                   </div>
+
                 </div>
 
-                <div class="kbd" id="hmKbd"></div>
-                <div class="feedback" id="d2Msg"></div>
+
+                <div
+                  class="kbd"
+                  id="hmKbd">
+                </div>
+
+                <div
+                  class="feedback"
+                  id="d2Msg">
+                </div>
+
               </div>
+
             </div>
+
           </section>
 
-          <!-- ============ DOC 3 ============ -->
+
+          <!-- =====================================================
+               DOC 3
+               ===================================================== -->
+
           <section id="view-doc3" class="view">
+
             <div class="doc-top">
-              <button class="btn-back" data-back>←</button>
-              <div class="doc-title">Personal_Notes.doc</div>
-              <span class="doc-diff d3">LEVEL 3</span>
+
+              <button
+                class="btn-back"
+                data-back>
+                ←
+              </button>
+
+              <div class="doc-title">
+                Personal_Notes.doc
+              </div>
+
+              <span class="doc-diff d3">
+                LEVEL 3
+              </span>
+
             </div>
+
+
             <div class="doc-body">
+
               <div class="paper">
+
                 <h3>Cross-Reference Grid</h3>
-                <p class="muted">Five terms were embedded in the board by the missing person.</p>
+
+                <p class="muted">
+                  Five terms were embedded in the board by the
+                  missing person.
+                </p>
+
                 <div class="rule"></div>
+
+
                 <div class="ws-layout">
-                  <div class="ws-grid" id="wsGrid"></div>
-                  <div class="ws-list">
-                    <h5>Words to look for</h5>
-                    <div id="wsWords"></div>
+
+                  <div
+                    class="ws-grid"
+                    id="wsGrid">
                   </div>
+
+
+                  <div class="ws-list">
+
+                    <h5>
+                      Words to look for
+                    </h5>
+
+                    <div
+                      id="wsWords">
+                    </div>
+
+                  </div>
+
                 </div>
+
+
                 <div class="ws-hint">
-                  Tap the <b>first letter</b>, then tap the <b>last letter</b> of a word.<br>
-                  Words run horizontally, vertically, diagonally — and some backwards.
+
+                  Tap the <b>first letter</b>, then tap the
+                  <b>last letter</b> of a word.
+
+                  <br>
+
+                  Words run horizontally, vertically, diagonally —
+                  and some backwards.
+
                 </div>
+
+
                 <div class="btn-row">
-                  <button class="btn btn-ghost" id="d3Reset">Reset selection</button>
+
+                  <button
+                    class="btn btn-ghost"
+                    id="d3Reset">
+                    Reset selection
+                  </button>
+
                 </div>
-                <div class="feedback" id="d3Msg"></div>
+
+
+                <div
+                  class="feedback"
+                  id="d3Msg">
+                </div>
+
               </div>
+
             </div>
+
           </section>
 
-          <!-- ============ DOC 4 ============ -->
+
+          <!-- =====================================================
+               DOC 4
+               ===================================================== -->
+
           <section id="view-doc4" class="view">
+
             <div class="doc-top">
-              <button class="btn-back" data-back>←</button>
-              <div class="doc-title">Cipher_Log.doc</div>
-              <span class="doc-diff d4">LEVEL 4</span>
+
+              <button
+                class="btn-back"
+                data-back>
+                ←
+              </button>
+
+              <div class="doc-title">
+                Cipher_Log.doc
+              </div>
+
+              <span class="doc-diff d4">
+                LEVEL 4
+              </span>
+
             </div>
+
+
             <div class="doc-body">
+
               <div class="paper">
+
                 <h3>Encrypted Index</h3>
-                <p class="muted">The last fragment is stored behind a completed matrix.</p>
+
+                <p class="muted">
+                  The last fragment is stored behind a completed
+                  matrix.
+                </p>
+
                 <div class="rule"></div>
-                <p><b>"I don't know who they are, or what they want from me. I've hidden one last clue in this document. If you're reading this, you have probably already found the first three pieces. Solve the grid."</b></p>
-                <p>Fill every empty cell with <b>1–4</b> so that each <b>row</b>, each <b>column</b>
-                   and each <b>2×2 block</b> contains 1, 2, 3 and 4 exactly once.</p>
-                <div class="sk-grid" id="skGrid"></div>
-                <div class="sk-legend">Bold cells are fixed by the cipher and cannot change.</div>
+
+                <p>
+                  <b>
+                    "I don't know who they are, or what they want
+                    from me. I've hidden one last clue in this
+                    document. If you're reading this, you have
+                    probably already found the first three pieces.
+                    Solve the grid."
+                  </b>
+                </p>
+
+                <p>
+                  Fill every empty cell with <b>1–4</b> so that each
+                  <b>row</b>, each <b>column</b> and each
+                  <b>2×2 block</b> contains 1, 2, 3 and 4 exactly
+                  once.
+                </p>
+
+
+                <div
+                  class="sk-grid"
+                  id="skGrid">
+                </div>
+
+
+                <div class="sk-legend">
+                  Bold cells are fixed by the cipher and cannot
+                  change.
+                </div>
+
+
                 <div class="btn-row">
-                  <button class="btn btn-primary" id="d4Check">Verify Matrix</button>
-                  <button class="btn btn-ghost" id="d4Clear">Clear Entries</button>
+
+                  <button
+                    class="btn btn-primary"
+                    id="d4Check">
+                    Verify Matrix
+                  </button>
+
+                  <button
+                    class="btn btn-ghost"
+                    id="d4Clear">
+                    Clear Entries
+                  </button>
+
                 </div>
-                <div class="feedback" id="d4Msg"></div>
+
+
+                <div
+                  class="feedback"
+                  id="d4Msg">
+                </div>
+
               </div>
+
             </div>
+
           </section>
 
-          <!-- ============ ASSEMBLE ============ -->
-          <section id="view-assemble" class="view dark-view">
+
+          <!-- =====================================================
+               ASSEMBLE
+               ===================================================== -->
+
+          <section
+            id="view-assemble"
+            class="view dark-view">
+
             <div class="dark-top">
-              <button class="btn-back" data-back>←</button>
-              <div class="doc-title">Fragment Reconstruction</div>
+
+              <button
+                class="btn-back"
+                data-back>
+                ←
+              </button>
+
+              <div class="doc-title">
+                Fragment Reconstruction
+              </div>
+
             </div>
+
+
             <div class="dark-body">
-              <h3 id="asmTitle">Four fragments recovered</h3>
-              <p class="sm" id="asmSub">Align the fragments to rebuild the original evidence photo.</p>
-              <div class="assembly-stage" id="asmStage">
+
+              <h3 id="asmTitle">
+                Four fragments recovered
+              </h3>
+
+              <p
+                class="sm"
+                id="asmSub">
+                Align the fragments to rebuild the original
+                evidence photo.
+              </p>
+
+
+              <div
+                class="assembly-stage"
+                id="asmStage">
+
                 <div class="frame-glow"></div>
+
               </div>
-              <div class="btn-row" style="justify-content:center">
-                <button class="btn btn-primary" id="btnAssemble">Assemble Puzzle</button>
-                <button class="btn btn-ghost" id="btnToFinal" style="display:none">Read the clue →</button>
+
+
+              <div
+                class="btn-row"
+                style="justify-content:center">
+
+                <button
+                  class="btn btn-primary"
+                  id="btnAssemble">
+                  Assemble Puzzle
+                </button>
+
+                <button
+                  class="btn btn-ghost"
+                  id="btnToFinal"
+                  style="display:none">
+                  Read the clue →
+                </button>
+
               </div>
+
             </div>
+
           </section>
 
-          <!-- ============ FINAL QUESTION ============ -->
-          <section id="view-final" class="view dark-view">
+
+          <!-- =====================================================
+               FINAL QUESTION
+               ===================================================== -->
+
+          <section
+            id="view-final"
+            class="view dark-view">
+
             <div class="dark-top">
-              <button class="btn-back" data-back-assemble>←</button>
-              <div class="doc-title">Final Clue</div>
-            </div>
-            <div class="dark-body">
-              <h3>The pieces reveal one final clue.</h3>
-              <p class="sm">Solve it to continue.</p>
-              <div class="final-image-holder" id="finalImage"></div>
-              <div class="answer-box">
-                <label for="finalInput">Enter your answer</label>
-                <input id="finalInput" placeholder="…" autocomplete="off" />
-                <div class="btn-row" style="justify-content:center">
-                  <button class="btn btn-primary" id="btnSubmitFinal">Submit Answer</button>
-                </div>
-                <div class="msg" id="finalMsg"></div>
+
+              <button
+                class="btn-back"
+                data-back-assemble>
+                ←
+              </button>
+
+              <div class="doc-title">
+                Final Clue
               </div>
+
             </div>
+
+
+            <div class="dark-body">
+
+              <h3>
+                The pieces reveal one final clue.
+              </h3>
+
+              <p class="sm">
+                Solve it to continue.
+              </p>
+
+
+              <div
+                class="final-image-holder"
+                id="finalImage">
+              </div>
+
+
+              <div class="answer-box">
+
+                <label for="finalInput">
+                  Enter your answer
+                </label>
+
+                <input
+                  id="finalInput"
+                  placeholder="…"
+                  autocomplete="off" />
+
+
+                <div
+                  class="btn-row"
+                  style="justify-content:center">
+
+                  <button
+                    class="btn btn-primary"
+                    id="btnSubmitFinal">
+                    Submit Answer
+                  </button>
+
+                </div>
+
+
+                <div
+                  class="msg"
+                  id="finalMsg">
+                </div>
+
+              </div>
+
+            </div>
+
           </section>
 
-          <!-- ============ COMPLETE ============ -->
-          <section id="view-complete" class="view dark-view">
-            <div class="trophy">🗝️</div>
-            <h3 style="font-size:21px;color:#fff;letter-spacing:1.2px;margin-top:10px">Investigation Complete</h3>
-            <p class="sm" style="margin-top:8px">Every fragment recovered. The final clue has been broken.</p>
-            <div class="complete-time" id="finalTime">00:00</div>
-            <div style="font-size:10px;letter-spacing:3px;color:#6e829c;text-transform:uppercase">Total completion time</div>
+
+          <!-- =====================================================
+               COMPLETE
+               ===================================================== -->
+
+          <section
+            id="view-complete"
+            class="view dark-view">
+
+            <div class="trophy">
+              🗝️
+            </div>
+
+            <h3
+              style="font-size:21px;color:#fff;letter-spacing:1.2px;margin-top:10px">
+              Investigation Complete
+            </h3>
+
+            <p
+              class="sm"
+              style="margin-top:8px">
+              Every fragment recovered. The final clue has been
+              broken.
+            </p>
+
+
+            <div
+              class="complete-time"
+              id="finalTime">
+              00:00
+            </div>
+
+
+            <div
+              style="font-size:10px;letter-spacing:3px;color:#6e829c;text-transform:uppercase">
+              Total completion time
+            </div>
+
+
             <div class="stat-grid">
-              <div class="stat"><b>4 / 4</b><span>Documents</span></div>
-              <div class="stat"><b>4 / 4</b><span>Fragments</span></div>
-              <div class="stat"><b>0447</b><span>Case ID</span></div>
-              <div class="stat"><b>Closed</b><span>Status</span></div>
+
+              <div class="stat">
+                <b>4 / 4</b>
+                <span>Documents</span>
+              </div>
+
+              <div class="stat">
+                <b>4 / 4</b>
+                <span>Fragments</span>
+              </div>
+
+              <div class="stat">
+                <b>0447</b>
+                <span>Case ID</span>
+              </div>
+
+              <div class="stat">
+                <b>Closed</b>
+                <span>Status</span>
+              </div>
+
             </div>
-            <div class="btn-row" style="justify-content:center;margin-top:22px">
-              <button class="btn btn-primary" id="btnPlayAgain">New Investigation</button>
+
+
+            <!-- COMPLETION LEADERBOARD -->
+
+            <div
+              class="leaderboard-box"
+              style="margin-top:20px">
+
+              <h4
+                style="color:#fff;margin-bottom:10px">
+                🏆 Leaderboard
+              </h4>
+
+              <div
+                id="completeLbList">
+              </div>
+
             </div>
+
+
+            <div
+              class="btn-row"
+              style="justify-content:center;margin-top:22px">
+
+              <button
+                class="btn btn-primary"
+                id="btnPlayAgain">
+                New Investigation
+              </button>
+
+            </div>
+
           </section>
 
-        </div><!-- /views -->
+
+          <!-- =====================================================
+               LEADERBOARD
+               ===================================================== -->
+
+          <section
+            id="view-leaderboard"
+            class="view dark-view">
+
+            <div class="dark-top">
+
+              <button
+                class="btn-back"
+                id="btnBackFromLb">
+                ←
+              </button>
+
+              <div class="doc-title">
+                Leaderboard
+              </div>
+
+            </div>
+
+
+            <div class="dark-body">
+
+              <div
+                style="text-align:center;margin-bottom:20px">
+
+                <div
+                  style="font-size:36px">
+                  🏆
+                </div>
+
+                <h3>
+                  Global Rankings
+                </h3>
+
+                <p class="sm">
+                  Fastest investigation completion times
+                </p>
+
+              </div>
+
+
+              <!-- TABLE HEADER -->
+
+              <div
+                class="lb-row"
+                style="font-weight:bold;opacity:.7">
+
+                <span>Rank</span>
+                <span>Investigator</span>
+                <span>Time</span>
+
+              </div>
+
+
+              <!-- FIRESTORE DATA GOES HERE -->
+
+              <div
+                id="globalLbList">
+              </div>
+
+
+              <div
+                class="btn-row"
+                style="justify-content:center;margin-top:20px">
+
+                <button
+                  class="btn btn-ghost"
+                  id="btnCloseLb">
+                  Back
+                </button>
+
+              </div>
+
+            </div>
+
+          </section>
+
+        </div>
+        <!-- /views -->
+
+
+        <!-- TOAST -->
 
         <div id="toast"></div>
 
+
         <!-- MODAL -->
-        <div class="modal-wrap" id="modalWrap">
-          <div class="modal" id="modalBox"></div>
+
+        <div
+          class="modal-wrap"
+          id="modalWrap">
+
+          <div
+            class="modal"
+            id="modalBox">
+          </div>
+
         </div>
 
-      </div><!-- /phone-screen -->
-    </div><!-- /phone -->
-  </div><!-- /phone-wrap -->
+      </div>
+      <!-- /phone-screen -->
+
+    </div>
+    <!-- /phone -->
+
+  </div>
+  <!-- /phone-wrap -->
+
+
+  <!-- =============================================================
+       FIREBASE
+       MUST LOAD BEFORE game.js
+       ============================================================= -->
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+
+  <!-- PUZZLES FIRST -->
+
+  <script src="puzzles.js"></script>
+
+
+  <!-- GAME LAST -->
 
   <script src="game.js"></script>
-  <script src="puzzles.js"></script>
+
 </body>
+
 </html>
