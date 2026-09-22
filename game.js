@@ -2,15 +2,45 @@
    GOOGLE DRIVE INVESTIGATION — MAIN CORE & UTILITIES (game.js)
    ================================================================== */
 
+/* ---------- 0. FIREBASE INITIALIZATION ---------- */
+/*  Replace the placeholder config below with the actual firebaseConfig
+    object copied from the Firebase console during project setup.       */
+const firebaseConfig = {
+  apiKey: "REPLACE_ME",
+  authDomain: "REPLACE_ME.firebaseapp.com",
+  databaseURL: "https://REPLACE_ME-default-rtdb.firebaseio.com",
+  projectId: "REPLACE_ME",
+  storageBucket: "REPLACE_ME.appspot.com",
+  messagingSenderId: "REPLACE_ME",
+  appId: "REPLACE_ME"
+};
+
+let db = null;
+let firebaseReady = false;
+try {
+  if (typeof firebase !== 'undefined' && firebaseConfig.apiKey !== 'REPLACE_ME') {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.database();
+    firebaseReady = true;
+  } else {
+    console.warn('Firebase not configured yet. Leaderboard will show a setup message.');
+  }
+} catch (e) {
+  console.error('Firebase init failed:', e);
+}
+
 /* ---------- A. STATE ---------- */
 const STORE_KEY = 'gdrive_investigation_v1';
+const NAME_KEY  = 'gdrive_investigation_player';
 const DEFAULT_STATE = {
   started: false,
   startTime: null,
   endTime: null,
   solved: [false, false, false, false],
   assembled: false,
-  finished: false
+  finished: false,
+  playerName: '',
+  scoreSubmitted: false
 };
 let S = { ...DEFAULT_STATE };
 
@@ -34,6 +64,8 @@ function load() {
   }
 }
 
+/*  resetAll only clears the current game session — the leaderboard on
+    Firebase is untouched, and the player's saved name is preserved.   */
 function resetAll() {
   try {
     localStorage.removeItem(STORE_KEY);
@@ -59,17 +91,25 @@ function elapsed() {
 }
 
 function tick() {
-  timerChip.textContent = fmt(elapsed());
-  timerChip.classList.toggle('stopped', !!S.finished);
+  if (timerChip) {
+    timerChip.textContent = fmt(elapsed());
+    timerChip.classList.toggle('stopped', !!S.finished);
+  }
 }
 setInterval(tick, 250);
 
 /* ---------- C. NAVIGATION ---------- */
+let previousView = 'view-start';
+
 function show(id) {
+  const current = document.querySelector('.view.active');
+  if (current && current.id !== id) previousView = current.id;
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   const el = document.getElementById(id);
-  el.classList.add('active');
-  el.scrollTop = 0;
+  if (el) {
+    el.classList.add('active');
+    el.scrollTop = 0;
+  }
 }
 
 document.querySelectorAll('[data-back]').forEach(b => {
@@ -82,6 +122,7 @@ document.querySelectorAll('[data-back-assemble]').forEach(b => {
 let toastT;
 function toast(msg) {
   const t = document.getElementById('toast');
+  if (!t) return;
   t.textContent = msg;
   t.classList.add('show');
   clearTimeout(toastT);
@@ -147,14 +188,15 @@ function makeFullImage() {
 
 /* ---------- E. DRIVE UI ---------- */
 const FILES = [
-  { id: 0, name: 'Travel_Notes.doc', ico: 'ico-1', glyph: '📄', info: 'Text document · 12 KB · Modified 2 days ago', view: 'view-doc1' },
-  { id: 1, name: 'Sranger.doc', ico: 'ico-2', glyph: '🗒️', info: 'Text document · 31 KB · Modified 2 days ago', view: 'view-doc2' },
-  { id: 2, name: 'Personal_Notes.doc', ico: 'ico-3', glyph: '🔎', info: 'Text document · 58 KB · Modified 1 day ago', view: 'view-doc3' },
-  { id: 3, name: 'Cipher_Log.doc', ico: 'ico-4', glyph: '🔐', info: 'Text document · 9 KB · Modified 6 hours ago', view: 'view-doc4' }
+  { id: 0, name: 'Travel_Notes.doc',   ico: 'ico-1', glyph: '📄', info: 'Text document · 12 KB · Modified 2 days ago',  view: 'view-doc1' },
+  { id: 1, name: 'Sranger.doc',        ico: 'ico-2', glyph: '🗒️', info: 'Text document · 31 KB · Modified 2 days ago',  view: 'view-doc2' },
+  { id: 2, name: 'Personal_Notes.doc', ico: 'ico-3', glyph: '🔎', info: 'Text document · 58 KB · Modified 1 day ago',   view: 'view-doc3' },
+  { id: 3, name: 'Cipher_Log.doc',     ico: 'ico-4', glyph: '🔐', info: 'Text document · 9 KB · Modified 6 hours ago', view: 'view-doc4' }
 ];
 
 function renderFiles(filter = '') {
   const wrap = document.getElementById('fileList');
+  if (!wrap) return;
   wrap.innerHTML = '';
   const q = filter.trim().toLowerCase();
   const list = FILES.filter(f => !q || f.name.toLowerCase().includes(q));
@@ -180,6 +222,7 @@ function renderFiles(filter = '') {
 
 function renderPiecesBar(popIdx = -1) {
   const slots = document.getElementById('pbSlots');
+  if (!slots) return;
   slots.innerHTML = '';
   for (let i = 0; i < 4; i++) {
     const d = document.createElement('div');
@@ -198,25 +241,36 @@ function renderPiecesBar(popIdx = -1) {
     slots.appendChild(d);
   }
   const n = S.solved.filter(Boolean).length;
-  document.getElementById('pbCount').textContent = n + ' / 4';
-  document.getElementById('assembleCard').style.display = (n === 4) ? 'flex' : 'none';
+  const pbCount = document.getElementById('pbCount');
+  if (pbCount) pbCount.textContent = n + ' / 4';
+  const assembleCard = document.getElementById('assembleCard');
+  if (assembleCard) assembleCard.style.display = (n === 4) ? 'flex' : 'none';
 }
 
-document.getElementById('assembleCard').addEventListener('click', () => {
-  show('view-assemble');
-  buildAssembly();
-});
-document.getElementById('driveSearch').addEventListener('input', e => renderFiles(e.target.value));
+const assembleCardEl = document.getElementById('assembleCard');
+if (assembleCardEl) {
+  assembleCardEl.addEventListener('click', () => {
+    show('view-assemble');
+    buildAssembly();
+  });
+}
+
+const driveSearchEl = document.getElementById('driveSearch');
+if (driveSearchEl) {
+  driveSearchEl.addEventListener('input', e => renderFiles(e.target.value));
+}
 
 /* ---------- PIECE AWARD MODAL ---------- */
 function awardPiece(idx) {
   if (S.solved[idx]) return;
   S.solved[idx] = true;
   save();
-  renderFiles(document.getElementById('driveSearch').value);
+  const searchVal = driveSearchEl ? driveSearchEl.value : '';
+  renderFiles(searchVal);
   renderPiecesBar(idx);
 
   const box = document.getElementById('modalBox');
+  if (!box) return;
   box.innerHTML = `
     <div class="big">🧩</div>
     <h4>Puzzle Piece ${idx + 1} recovered.</h4>
@@ -235,11 +289,128 @@ function awardPiece(idx) {
     c.style.animationDelay = (Math.random() * .5) + 's';
     box.appendChild(c);
   }
-  document.getElementById('modalWrap').classList.add('show');
+  const modalWrap = document.getElementById('modalWrap');
+  if (modalWrap) modalWrap.classList.add('show');
   box.querySelector('#mClose').addEventListener('click', () => {
-    document.getElementById('modalWrap').classList.remove('show');
+    if (modalWrap) modalWrap.classList.remove('show');
     show('view-drive');
   });
+}
+
+/* ==================================================================
+   F. LEADERBOARD (Firebase Realtime Database)
+   ================================================================== */
+
+/*  Sanitise a name so it can be used safely as a Firebase key.
+    Firebase disallows: . # $ / [ ]                                     */
+function sanitizeKey(name) {
+  return name.replace(/[.#$/[\]]/g, '_').substring(0, 32);
+}
+
+/*  Escape user-supplied text before injecting it into innerHTML.       */
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+/*  Submit the current player's score. Keeps only the best (lowest) time
+    per player name via a transaction.                                  */
+function submitScore(callback) {
+  if (!firebaseReady) {
+    if (callback) callback(false);
+    return;
+  }
+  const name = (S.playerName || '').trim();
+  if (!name) { if (callback) callback(false); return; }
+
+  const timeMs = (S.endTime || 0) - (S.startTime || 0);
+  if (timeMs <= 0) { if (callback) callback(false); return; }
+
+  const key = sanitizeKey(name);
+  const ref = db.ref('leaderboard/' + key);
+
+  ref.transaction(existing => {
+    if (existing && typeof existing.timeMs === 'number' && existing.timeMs <= timeMs) {
+      return existing; // keep the older, faster record
+    }
+    return {
+      name: name,
+      timeMs: timeMs,
+      timeFormatted: fmt(timeMs),
+      timestamp: Date.now()
+    };
+  }, (err, committed) => {
+    if (err) console.error('submitScore error:', err);
+    if (callback) callback(!err);
+  });
+}
+
+/*  Fetch top-10 fastest entries and render into the given container.   */
+function loadLeaderboard(targetId) {
+  const target = document.getElementById(targetId);
+  if (!target) return;
+
+  if (!firebaseReady) {
+    target.innerHTML = '<div class="lb-status">⚠️ Leaderboard offline<br>Firebase not configured.</div>';
+    return;
+  }
+
+  target.innerHTML = '<div class="lb-status">Loading rankings…</div>';
+
+  db.ref('leaderboard').orderByChild('timeMs').limitToFirst(10).once('value')
+    .then(snapshot => {
+      const rows = [];
+      snapshot.forEach(child => {
+        const v = child.val();
+        if (v && typeof v.timeMs === 'number') rows.push(v);
+      });
+      rows.sort((a, b) => a.timeMs - b.timeMs);
+
+      if (!rows.length) {
+        target.innerHTML = '<div class="lb-status">No scores recorded yet.<br>Be the first!</div>';
+        return;
+      }
+
+      const currentName = (S.playerName || '').trim().toLowerCase();
+      let html = '';
+      rows.forEach((r, i) => {
+        const isMe = r.name && r.name.trim().toLowerCase() === currentName && S.finished;
+        const cls  = isMe ? 'lb-row highlight' : 'lb-row';
+        const time = r.timeFormatted || fmt(r.timeMs);
+        html += `
+          <div class="${cls}">
+            <span>${i + 1}</span>
+            <span>${escapeHtml(r.name)}</span>
+            <span>${escapeHtml(time)}</span>
+          </div>`;
+      });
+      target.innerHTML = html;
+    })
+    .catch(err => {
+      console.error('loadLeaderboard error:', err);
+      target.innerHTML = '<div class="lb-status">Could not load rankings.<br>Check your connection.</div>';
+    });
+}
+
+/*  Wire up leaderboard buttons on the start screen.                    */
+const btnOpenLb = document.getElementById('btnOpenLeaderboard');
+if (btnOpenLb) {
+  btnOpenLb.addEventListener('click', () => {
+    show('view-leaderboard');
+    loadLeaderboard('globalLbList');
+  });
+}
+const btnBackFromLb = document.getElementById('btnBackFromLb');
+if (btnBackFromLb) {
+  btnBackFromLb.addEventListener('click', () => show(previousView || 'view-start'));
+}
+const btnCloseLb = document.getElementById('btnCloseLb');
+if (btnCloseLb) {
+  btnCloseLb.addEventListener('click', () => show(previousView || 'view-start'));
 }
 
 /* ==================================================================
@@ -252,6 +423,7 @@ const SCATTER = [
 
 function buildAssembly() {
   const stage = document.getElementById('asmStage');
+  if (!stage) return;
   stage.classList.remove('done');
   stage.querySelectorAll('.slot').forEach(s => s.remove());
   for (let i = 0; i < 4; i++) {
@@ -264,102 +436,210 @@ function buildAssembly() {
     slot.appendChild(makePiece(i, 150));
     stage.appendChild(slot);
   }
-  document.getElementById('btnAssemble').style.display = S.assembled ? 'none' : 'inline-block';
-  document.getElementById('btnToFinal').style.display = S.assembled ? 'inline-block' : 'none';
-  document.getElementById('asmTitle').textContent = S.assembled ? 'Image reconstructed' : 'Four fragments recovered';
-  document.getElementById('asmSub').textContent = S.assembled
-    ? 'Photo is complete.'
-    : 'Align the fragments to rebuild the original evidence photo.';
+  const btnAssemble = document.getElementById('btnAssemble');
+  const btnToFinal = document.getElementById('btnToFinal');
+  const asmTitle = document.getElementById('asmTitle');
+  const asmSub = document.getElementById('asmSub');
+
+  if (btnAssemble) btnAssemble.style.display = S.assembled ? 'none' : 'inline-block';
+  if (btnToFinal) btnToFinal.style.display = S.assembled ? 'inline-block' : 'none';
+  if (asmTitle) asmTitle.textContent = S.assembled ? 'Image reconstructed' : 'Four fragments recovered';
+  if (asmSub) {
+    asmSub.textContent = S.assembled
+      ? 'Photo is complete.'
+      : 'Align the fragments to rebuild the original evidence photo.';
+  }
   if (S.assembled) stage.classList.add('done');
 }
 
-document.getElementById('btnAssemble').addEventListener('click', () => {
-  const stage = document.getElementById('asmStage');
-  stage.classList.add('done');
-  document.getElementById('btnAssemble').style.display = 'none';
-  S.assembled = true;
-  save();
-  setTimeout(() => {
-    document.getElementById('asmTitle').textContent = 'Image reconstructed';
-    document.getElementById('asmSub').textContent = 'The composite evidence photo is complete.';
-    document.getElementById('btnToFinal').style.display = 'inline-block';
-    toast('Fragments aligned — clue visible');
-  }, 1450);
-});
+const btnAssembleEl = document.getElementById('btnAssemble');
+if (btnAssembleEl) {
+  btnAssembleEl.addEventListener('click', () => {
+    const stage = document.getElementById('asmStage');
+    if (stage) stage.classList.add('done');
+    btnAssembleEl.style.display = 'none';
+    S.assembled = true;
+    save();
+    setTimeout(() => {
+      const asmTitle = document.getElementById('asmTitle');
+      const asmSub = document.getElementById('asmSub');
+      const btnToFinal = document.getElementById('btnToFinal');
+      if (asmTitle) asmTitle.textContent = 'Image reconstructed';
+      if (asmSub) asmSub.textContent = 'The composite evidence photo is complete.';
+      if (btnToFinal) btnToFinal.style.display = 'inline-block';
+      toast('Fragments aligned — clue visible');
+    }, 1450);
+  });
+}
 
-document.getElementById('btnToFinal').addEventListener('click', () => {
-  const holder = document.getElementById('finalImage');
-  holder.innerHTML = '';
-  holder.appendChild(makeFullImage());
-  show('view-final');
-  setTimeout(() => document.getElementById('finalInput').focus(), 380);
-});
+const btnToFinalEl = document.getElementById('btnToFinal');
+if (btnToFinalEl) {
+  btnToFinalEl.addEventListener('click', () => {
+    const holder = document.getElementById('finalImage');
+    if (holder) {
+      holder.innerHTML = '';
+      holder.appendChild(makeFullImage());
+    }
+    show('view-final');
+    setTimeout(() => {
+      const input = document.getElementById('finalInput');
+      if (input) input.focus();
+    }, 380);
+  });
+}
 
 /* --- Final answer --- */
 const FINAL_ANSWER = '1381';
 
 function checkFinal() {
-  const raw = document.getElementById('finalInput').value;
+  const finalInput = document.getElementById('finalInput');
+  const raw = finalInput ? finalInput.value : '';
   const clean = (raw || '').replace(/[^0-9]/g, '');
   const msg = document.getElementById('finalMsg');
   if (!clean) {
-    msg.className = 'msg bad';
-    msg.textContent = 'Enter an answer first.';
+    if (msg) {
+      msg.className = 'msg bad';
+      msg.textContent = 'Enter an answer first.';
+    }
     return;
   }
   if (clean === FINAL_ANSWER) {
-    msg.className = 'msg ok';
-    msg.textContent = 'Correct. Sequence broken.';
+    if (msg) {
+      msg.className = 'msg ok';
+      msg.textContent = 'Correct. Sequence broken.';
+    }
     S.finished = true;
     S.endTime = Date.now();
     save();
     tick();
     setTimeout(() => {
-      document.getElementById('finalTime').textContent = fmt(S.endTime - S.startTime);
+      const finalTime = document.getElementById('finalTime');
+      if (finalTime) finalTime.textContent = fmt(S.endTime - S.startTime);
       show('view-complete');
+      // Submit score to Firebase, then load ranking table
+      submitScore(() => {
+        S.scoreSubmitted = true;
+        save();
+        loadLeaderboard('completeLbList');
+      });
     }, 900);
   } else {
-    msg.className = 'msg bad';
-    msg.textContent = 'Incorrect answer. Examine the image again.';
+    if (msg) {
+      msg.className = 'msg bad';
+      msg.textContent = 'Incorrect answer. Examine the image again.';
+    }
     const box = document.querySelector('.final-image-holder');
-    box.classList.add('shake');
-    setTimeout(() => box.classList.remove('shake'), 420);
-    document.getElementById('finalInput').select();
+    if (box) {
+      box.classList.add('shake');
+      setTimeout(() => box.classList.remove('shake'), 420);
+    }
+    if (finalInput) finalInput.select();
   }
 }
 
-document.getElementById('btnSubmitFinal').addEventListener('click', checkFinal);
-document.getElementById('finalInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') checkFinal();
-});
+const btnSubmitFinalEl = document.getElementById('btnSubmitFinal');
+if (btnSubmitFinalEl) {
+  btnSubmitFinalEl.addEventListener('click', checkFinal);
+}
+
+const finalInputEl = document.getElementById('finalInput');
+if (finalInputEl) {
+  finalInputEl.addEventListener('keydown', e => {
+    if (e.key === 'Enter') checkFinal();
+  });
+}
 
 /* ---------- START / RESET ---------- */
-document.getElementById('btnStart').addEventListener('click', () => {
-  if (!S.started) {
-    S.started = true;
-    S.startTime = Date.now();
-    save();
-  }
-  show('view-drive');
-  toast('Timer started — Drive access granted');
-});
-document.getElementById('btnResetStart').addEventListener('click', resetAll);
-document.getElementById('btnPlayAgain').addEventListener('click', resetAll);
+const btnStartEl = document.getElementById('btnStart');
+if (btnStartEl) {
+  btnStartEl.addEventListener('click', () => {
+    const nameInput = document.getElementById('playerName');
+    const errEl = document.getElementById('nameError');
+    const rawName = nameInput ? (nameInput.value || '').trim() : '';
+
+    // Validate the investigator name before starting
+    if (!rawName) {
+      if (errEl) errEl.textContent = 'Please enter an investigator name to begin.';
+      if (nameInput) nameInput.focus();
+      return;
+    }
+    if (rawName.length < 2) {
+      if (errEl) errEl.textContent = 'Name must be at least 2 characters.';
+      if (nameInput) nameInput.focus();
+      return;
+    }
+    if (errEl) errEl.textContent = '';
+
+    if (!S.started) {
+      S.started = true;
+      S.startTime = Date.now();
+      S.playerName = rawName;
+      save();
+      try { localStorage.setItem(NAME_KEY, rawName); } catch (e) {}
+    }
+    // Reflect avatar with the first initial
+    const av = document.getElementById('userAvatar');
+    if (av) av.textContent = rawName.charAt(0).toUpperCase();
+
+    show('view-drive');
+    toast('Timer started — Drive access granted');
+  });
+}
+
+const btnResetStartEl = document.getElementById('btnResetStart');
+if (btnResetStartEl) btnResetStartEl.addEventListener('click', resetAll);
+
+const btnPlayAgainEl = document.getElementById('btnPlayAgain');
+if (btnPlayAgainEl) btnPlayAgainEl.addEventListener('click', resetAll);
+
+/*  Live-clear validation error as the player types                     */
+const nameInputEl = document.getElementById('playerName');
+if (nameInputEl) {
+  nameInputEl.addEventListener('input', () => {
+    const errEl = document.getElementById('nameError');
+    if (errEl) errEl.textContent = '';
+  });
+}
 
 /* ---------- BOOTSTRAP INITIALIZER ---------- */
 window.addEventListener('DOMContentLoaded', () => {
   load();
-  buildD1();
-  buildD2();
-  buildD3();
-  buildD4();
+  if (typeof buildD1 === 'function') buildD1();
+  if (typeof buildD2 === 'function') buildD2();
+  if (typeof buildD3 === 'function') buildD3();
+  if (typeof buildD4 === 'function') buildD4();
+
   renderFiles();
   renderPiecesBar();
   tick();
 
+  // Restore player name in the input if we have one saved
+  const savedName = S.playerName || (function () {
+    try { return localStorage.getItem(NAME_KEY) || ''; } catch (e) { return ''; }
+  })();
+  const nameField = document.getElementById('playerName');
+  if (nameField && savedName) nameField.value = savedName;
+
+  // Reflect avatar for returning players
+  if (savedName) {
+    const av = document.getElementById('userAvatar');
+    if (av) av.textContent = savedName.charAt(0).toUpperCase();
+  }
+
   if (S.finished) {
-    document.getElementById('finalTime').textContent = fmt((S.endTime || 0) - (S.startTime || 0));
+    const finalTime = document.getElementById('finalTime');
+    if (finalTime) finalTime.textContent = fmt((S.endTime || 0) - (S.startTime || 0));
     show('view-complete');
+    // Ensure score is submitted (in case of a mid-submission refresh)
+    if (!S.scoreSubmitted) {
+      submitScore(() => {
+        S.scoreSubmitted = true;
+        save();
+        loadLeaderboard('completeLbList');
+      });
+    } else {
+      loadLeaderboard('completeLbList');
+    }
   } else if (S.started) {
     show('view-drive');
     setTimeout(() => toast('Session resumed — timer still running'), 500);
